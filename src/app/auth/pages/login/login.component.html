@@ -1,0 +1,30 @@
+<mat-card class="shadow-8 m-3">
+  <mat-card-header>
+    <mat-card-title>Login </mat-card-title>
+  </mat-card-header>
+  <mat-divider class="mt-2 mb-2"></mat-divider>
+  <mat-card-content>
+    <form [formGroup]="myForm">
+      <mat-form-field class="flex justify-content-center" appearance="outline">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="user" type="text" placeholder="Usuario" />
+        <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
+        <mat-error>Campo requerido</mat-error>
+      </mat-form-field>
+      <mat-form-field class="flex justify-content-center" appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput formControlName="password" type="password" placeholder="Contraseña" />
+        <mat-icon matSuffix>key_vpn</mat-icon>
+        <mat-error>Campo requerido</mat-error>
+      </mat-form-field>
+    </form>
+  </mat-card-content>
+  <mat-divider class="mt-2"></mat-divider>
+  <mat-card-actions >
+    <div class="flex justify-content-center" style="width: 100%; min-height: 50px">
+    <button mat-fab extended color="primary" style="min-width: 200px;" [disabled]="myForm.invalid" (click)="login()">
+      Login
+    </button>
+  </div>
+  </mat-card-actions>
+</mat-card>
