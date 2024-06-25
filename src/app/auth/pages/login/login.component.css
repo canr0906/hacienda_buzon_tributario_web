@@ -1,3 +1,16 @@
+/*[ login ]*/
+.login100-form {
+  width: 100%;
+}
+
+.login100-form-title {
+  display: block;
+  font-family: Poppins-Bold;
+  font-size: 39px;
+  color: #333333;
+  line-height: 1.2;
+  text-align: center;
+}
 /*[ Utility ]*/
 .txt1 {
   font-family: Poppins-Regular;

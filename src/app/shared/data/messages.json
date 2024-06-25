@@ -1,0 +1,16 @@
+{
+  "taxpayer": [
+    {
+      "id": 1,
+      "msg": "Nombre no coincide con la informacion de SMyT"
+    },
+    {
+      "id":100,
+      "msg": "Campo Requerido"
+    },
+    {
+      "id":101,
+      "msg": "Formato incorrecto"
+    }
+  ]
+}

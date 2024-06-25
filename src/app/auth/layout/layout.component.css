@@ -1,16 +1,16 @@
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
-* {
+/** {
   margin: 0px;
   padding: 0px;
   box-sizing: border-box;
   font-family: Poppins-Bold;
-}
+}*/
 
-body, html {
+/*body, html {
   height: 100%;
   font-family: Poppins-Regular, sans-serif;
-}
+}*/
 /*//////////////////////////////////////////////////////////////////
 [ login ]*/
 .limiter {
@@ -36,7 +36,7 @@ background-size: cover;
 }
 
 .wrap-login100 {
-width: 500px;
+width: 800px;
 background: #fff;
 border-radius: 10px;
 overflow: hidden;
@@ -49,3 +49,5 @@ overflow: hidden;
 .p-t-65 {padding-top: 65px;}
 
 .p-b-54 {padding-bottom: 54px;}
+
+

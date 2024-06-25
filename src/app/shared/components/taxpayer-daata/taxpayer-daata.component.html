@@ -1,0 +1,110 @@
+
+        <!--<form [formGroup]="formTaxPay">-->
+        <div class="" [formGroup]="formTaxPay" #ChildComponent>
+
+          <mat-form-field fxFlex style="margin-right:0.5em;" #field_p floatLabel="always" appearance="outline"
+            class="full-width radio-container">
+            <mat-label>Tipo de Persona</mat-label>
+            <input matInput style="display:none" required>
+            <mat-radio-group #group_c_tp formControlName="tipoPersona" class="flex-wrap"
+              (change)="changeRadioTP($event.value)">
+              <mat-radio-button #buttons_c_tp value="F">
+                <span class="wrap-label-text">Física</span>
+              </mat-radio-button>
+              <mat-radio-button #buttons_c_tp value="M">
+                <span class="wrap-label-text">Moral</span>
+              </mat-radio-button>
+            </mat-radio-group>
+          </mat-form-field>
+          @if (tipoPersona()=='M') {
+          <mat-form-field appearance="outline" class="sm:w-5" style="margin-right:0.5em;">
+            <mat-label>Razon Social</mat-label>
+            <input matInput type="text" formControlName="razonSocial">
+            <mat-error>El campo no puede ir vacio.</mat-error>
+          </mat-form-field>
+          }
+          @if (tipoPersona()=='F') {
+          <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput type="text" formControlName="nombre">
+            <mat-error>{{ getMessage(formTaxPay.get('nombre')?.getError('error'),'nombre') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+            <mat-label>Apellido Paterno</mat-label>
+            <input matInput type="text" formControlName="primerApellido">
+            <mat-error>{{ getMessage(formTaxPay.get('primerApellido')?.getError('error'),'primerApellido')
+              }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+            <mat-label>Apellido Materno</mat-label>
+            <input matInput type="text" formControlName="segundoApellido">
+            <mat-error>{{ getMessage(formTaxPay.get('segundoApellido')?.getError('error'),'segundoApellido')
+              }}</mat-error>
+          </mat-form-field>
+          }
+
+          <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+            <mat-label>RFC</mat-label>
+            <input matInput formControlName="rfc" type="text" name="" id="">
+            <mat-error>El RFC es incorrecto</mat-error>
+          </mat-form-field>
+          @if (tipoPersona()=='F') {
+          <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+            <mat-label>CURP</mat-label>
+            <input matInput formControlName="curp" type="text">
+            <mat-error></mat-error>
+          </mat-form-field>
+          }
+          <div formGroupName="domicilio">
+
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>Calle</mat-label>
+              <input matInput form formControlName="calle" type="text">
+              <mat-error>El campo no puede ir vacío</mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>No Exterior</mat-label>
+              <input matInput formControlName="numeroExterior" type="text">
+              <mat-error>El campo no puede ir vacío</mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>No Interior</mat-label>
+              <input matInput formControlName="numeroInterior" type="text">
+            </mat-form-field>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>Colonia</mat-label>
+              <input matInput formControlName="colonia" type="text">
+              <mat-error>El campo no puede ir vacío</mat-error>
+            </mat-form-field>
+
+
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>Código Postal</mat-label>
+              <input matInput formControlName="codigoPostal" type="number">
+              <mat-error>Código postal incorrecto</mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estados" (valueChange)="changeEstado($event)">
+                <mat-option value="0">--- Seleccione Estado ---</mat-option>
+                @for (estado of arrEstados; track $index) {
+                <mat-option [value]="estado.pk">{{estado.descripcion}}</mat-option>
+                }
+              </mat-select>
+              <mat-error></mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-select formControlName="municipio">
+                <mat-option value="0">--- Seleccione Municipio ---</mat-option>
+                @for (municipio of arrMunicipios; track $index) {
+                <mat-option [value]="municipio.pk">{{municipio.descripcion}}</mat-option>
+                }
+              </mat-select>
+              <mat-error></mat-error>
+            </mat-form-field>
+          </div>
+        <!--</form>-->
+        </div>

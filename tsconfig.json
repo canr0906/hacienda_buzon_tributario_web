@@ -24,10 +24,12 @@
       "dom"
     ],
     "paths": {
-      "@shared/*": ["./src/app/dashboard/*"],
+      "@dashboard/*": ["./src/app/dashboard/*"],
       "@auth/*":   ["./src/app/auth/*"],
-      "@environments/*": ["./src/environments/*"]
-    }
+      "@environments/*": ["./src/environments/*"],
+      "@shared/*": ["./src/app/shared/*"],
+    },
+    "resolveJsonModule": true,
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

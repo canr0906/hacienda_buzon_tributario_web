@@ -1,1 +1,58 @@
-<p>register works!</p>
+<!--<shared-load-spinner *ngIf="isLoading"></shared-load-spinner>-->
+<div class="grid flex">
+  <div ><!--[ngClass]="(sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall')?'col-8':'col-12'" >-->
+    <mat-card>
+      <mat-card-header class="mb-3">
+        <mat-card-title>
+          <span class="login100-form login100-form-title p-b-15">
+            Registro
+          </span>
+        </mat-card-title>
+        <mat-card-subtitle><!--{{conceptTitle | titlecase }}--></mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="mt-5">
+        <form class="example-form" ><!--[formGroup]="myForm">-->
+          <mat-accordion class="example-headers-align" [multi]="true" #accordion="matAccordion">
+            <mat-expansion-panel ><!--[expanded]="step === 0" (opened)="setStep(0)">-->
+              <mat-expansion-panel-header>
+                <mat-panel-description>
+                  Datos Generales
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
+              <hacienda-taxpayer-daata />
+              <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
+            </mat-expansion-panel>
+
+            <mat-expansion-panel >
+              <mat-expansion-panel-header>
+                <mat-panel-description>
+                  Datos de Contacto
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
+              <hacienda-taxpayer-daata />
+              <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
+            </mat-expansion-panel>
+
+            <mat-expansion-panel ><!--[expanded]="step === 0" (opened)="setStep(0)">-->
+              <mat-expansion-panel-header>
+                <mat-panel-description>
+                  Contribuciones Recurrentes
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
+              <hacienda-taxpayer-daata />
+              <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
+            </mat-expansion-panel>
+
+          </mat-accordion>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <!--<div class="col-4" *ngIf="sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall'">
+    <smyt-messages [messageArr]="messages" [messageArr_other]="messages_other"></smyt-messages>
+  </div>-->
+</div>
