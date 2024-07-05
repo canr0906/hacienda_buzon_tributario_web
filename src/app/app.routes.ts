@@ -29,12 +29,16 @@ export const routes: Routes = [
     //canActivate: [isAuthenticatedGuard],
     loadComponent: () => import('./dashboard/layout/layout-dash.component').then(c => c.LayoutDashComponent),
     children: [
-      /*{
-        path: 'refrendo/:idConcepto/:formulario',
-        title: 'Refrendo Vehicular',
-        loadComponent: () => import('./portal-servicios/smyt/pages/refrendo-page/refrendo-page.component'),
-      },*/
-
+      {
+        path: 'sevices-menu',
+        title: 'Menu de Servicios',
+        loadComponent: () => import('./dashboard/pages/services-menu/services-menu.component').then(c => c.ServicesMenuComponent),
+      },
+      {
+        path: 'portal-hacienda-servicios',
+        title: 'Menu de Portal de Hacienda',
+        loadComponent: () => import('./dashboard/pages/portal-hacienda-services/portal-hacienda-menu/portal-hacienda-menu.component').then(c => c.PortalHaciendaMenuComponent),
+      },
     ]
   },
   {

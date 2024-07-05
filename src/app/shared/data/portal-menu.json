@@ -1,0 +1,12 @@
+[
+  {
+    "name":      "Mi Portal",
+    "iconName": "miportal",
+    "route":     "buzon-tributario"
+  },
+  {
+    "name":      "Pago de Servicios",
+    "iconName": "pago_servicios",
+    "route":     "portal-hacienda-servicios"
+  }
+]

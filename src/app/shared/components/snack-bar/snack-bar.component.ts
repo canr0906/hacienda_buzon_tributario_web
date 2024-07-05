@@ -25,8 +25,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
         </span>
       </div>
     </div>
-  `,
-  styleUrl: './snack-bar.component.css'
+  `
 })
 export class SnackBarComponent {
   constructor(

@@ -1,0 +1,12 @@
+@if (isLoading()) {
+  <load-spinner />
+}
+<div class="grid mb-8 p-3 cursor-pointer flex align-items-center justify-content-center">
+  @for (item of cardsArr; track $index) {
+  <div class="col-4 sm:col-4 md:col-3 xl:col-2" >
+    <mat-card>
+      <img mat-card-image [src]="item | haciendaMenuImages" [alt]="item.titulo" (click)="emitValCard(item.pk)">
+    </mat-card>
+  </div>
+  }
+</div>

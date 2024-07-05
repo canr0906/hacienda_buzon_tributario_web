@@ -1,3 +1,18 @@
-<div class=""><!--div class="example-sidenav-content"-->
-  <router-outlet></router-outlet>
-</div>
+<!--<mat-drawer-container style="background-image: url('./assets/images/164621.jpg'); background-position: center; background-size: cover;" fullscreen>
+  <hacienda-sidenav
+  [reciveActionSideNav]="sendActionSidenav"
+  [eraseLocalStor]="sendActEraseLocalStor"
+  (nameConcept)="reciveNameConcept($event)"
+  />
+  <hacienda-toolbar
+  (openOrCloseSidenav)="actionOnSidenav($event)"
+  (closeLocalStor)="redirectHome($event)"
+  [receiveNameDep]="senNameDep()"
+  [viewResolution]="sizeDisplay"
+  />
+  <div class="">
+    <router-outlet></router-outlet>
+  </div>
+</mat-drawer-container>-->
+
+<router-outlet></router-outlet>
