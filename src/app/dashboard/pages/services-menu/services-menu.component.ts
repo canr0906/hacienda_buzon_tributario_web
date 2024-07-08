@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { PortalMenu } from '@dashboard/interfaces/portal-menu.interfaz';
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
@@ -19,7 +19,8 @@ import { Router } from '@angular/router';
   templateUrl: './services-menu.component.html',
   styleUrl: './services-menu.component.css'
 })
-export class ServicesMenuComponent {
+export class ServicesMenuComponent implements OnInit {
+
   /* CONTROLA EL RESPONSE DEL CONTENIDO DEL MENU */
   public optionsMenu = signal<PortalMenu[]>(PortalMenuArr);
 
@@ -31,11 +32,15 @@ export class ServicesMenuComponent {
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
   public isLoading = signal<boolean>(false);
 
+  ngOnInit(): void {
+    this.parentLayout.showoptions.set(false);
+  }
+
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: string): void {
     //this.valCardDep.emit(this.cardsArr.filter(({pk}) => pk===id))
     //this.parentLayout.reciveValCard(this.cardsArr.filter(({ pk }) => pk === id));
-    console.log(id)
+    console.log('/dashboard/'+id)
     this.router.navigate(['/dashboard/'+id]);
   }
 }

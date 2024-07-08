@@ -1,1 +1,38 @@
-<p>refrendo works!</p>
+@if (isLoading()) {
+  <load-spinner></load-spinner>
+  }
+  <div class="grid">
+    <div class="col-8 col-offset-2">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Cálculo de Costos</mat-card-title>
+          <mat-card-subtitle>{{conceptTitle() | titlecase }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-divider class="mt-2 mb-2"></mat-divider>
+        <mat-card-content>
+          <form [formGroup]="myForm">
+            <smyt-vehicle-data
+              [disablesSerie]="true"
+              [disablesValorVenta]="true"
+              [disabledPlaca]="false"
+              [disabledTipoV]="true"
+              [disablesSerieSec]="true"
+              [disableDate]="true"
+            />
+          </form>
+        </mat-card-content>
+        <mat-divider></mat-divider>
+        <mat-card-actions align="end">
+          <button mat-stroked-button color="warn" [routerLink]="['/dashboard']">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+          <span class="px-2"></span>
+          <button mat-stroked-button color="primary" [disabled]="myForm.invalid" (click)="onSubmit()">
+            <mat-icon>calculate</mat-icon>
+            Calcular
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>

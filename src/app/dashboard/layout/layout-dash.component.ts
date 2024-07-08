@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {SidenavComponent} from '@shared/components/sidenav/sidenav.component';
@@ -7,9 +7,10 @@ import {SnackBarComponent} from '@shared/components/snack-bar/snack-bar.componen
 
 import {MatSidenavModule} from '@angular/material/sidenav';
 import { PortalMenu } from '@dashboard/interfaces/portal-menu.interfaz';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DataConceptsStruct } from '@dashboard/interfaces/concepts-response-struct.interface';
+import { DataConceptsStruct } from '@shared/interfaces/concepts-response-struct.interface';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-layout-dash',
@@ -34,41 +35,65 @@ export class LayoutDashComponent implements OnDestroy {
   private _snackBar = inject(MatSnackBar);
 
   /* RECIBE EL NOMBRE DEL CONCEPTO DEL SIDENAV PARA SU MANIPULACION */
-  public receiveNameConcept!: string;
+  public receiveNameConcept = signal<string>('');
 
   /* SE ENVIA AL COMPONENTE TOOLBAR */
-  public senNameDep: string = 'SECRETARÍA DE HACIENDA Y CRÉDITO PÚBLICO';
+  public senNameDep = signal<string>('SECRETARÍA DE HACIENDA Y CRÉDITO PÚBLICO');
 
   /* ENVIA UN VALOR ALEATORIO MAYOR A 0 PARA INDICAR QUE SE IRA AL HOME, SE ENVIARA AL SIDENAV QUE LIMPIARA VARIABLES AL RECIBIR */
   public sendActEraseLocalStor: Subject<boolean> = new Subject<boolean>();
 
-  public controlView: boolean = false;
+  public controlView = signal<boolean>(false);
 
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
-  public isLoading: boolean = false;
+  public isLoading = signal<boolean>(false);
+
+  /* RECIBE DEL SERVICE-MENU.COMPONENT PARA VISUALIZAR O NO LAS OPCIONES DE TOOLBAR */
+  public showoptions = signal<boolean>(true);
+
+  private destroyed = new Subject<void>();
+  /* CONTROLAR LA RESOLUCION DE LA PANTALLA */
+  public sizeDisplay = signal<string>('');
+  /* CONTROLAR EL TIPO DE RESOLUCIONES */
+  private displayNameMap = new Map([
+    [Breakpoints.XSmall, 'XSmall'],
+    [Breakpoints.Small, 'Small'],
+    [Breakpoints.Medium, 'Medium'],
+    [Breakpoints.Large, 'Large'],
+    [Breakpoints.XLarge, 'XLarge'],
+  ]);
+  /* INYECCION DE LA DEPENDECIA QUE ESCUCHA  LA RESOLUCION ACTUAL */
+  private breakpointObserver = inject(BreakpointObserver);
+
+  constructor() {
+    this.mediaQuery();
+  }
 
   ngOnDestroy(): void {
     this.valCardSubjectEmitt.unsubscribe();
     this.sendActionSidenav.unsubscribe();
     this.sendActEraseLocalStor.unsubscribe();
+
+    this.destroyed.next();
+    this.destroyed.unsubscribe();
   }
 
   /* RECIBE UN OBJETO DE LA DEPENDENCIA SELECIONADA DEL COMPONENTE SERVICE-MENU.COMPONENT */
   reciveValCard(valCard: DataConceptsStruct[]){//PortalMenu[]) {
     this.valCardSubjectEmitt.next(valCard);
-    this.senNameDep = valCard[0].titulo;
+    this.senNameDep.set(valCard[0].titulo);
   }
 
   /* NOTA: RECIBE NOMBRE DEL CONCEPTO CELECCIONADO EN SIDENAV */
   reciveNameConcept(nameConcep: string) {
-    this.receiveNameConcept = ' - [ ' + nameConcep + ' ]';
-    this.controlView = true;
+    this.receiveNameConcept.set(' - [ ' + nameConcep + ' ]');
+    this.controlView.set(true);
   }
 
   redirectHome(event: boolean): void {
-    this.controlView = false;
-    this.senNameDep = 'SECRETARÍA DE HACIENDA Y CRÉDITO PÚBLICO';
-    this.receiveNameConcept = '';
+    this.controlView.set(false);
+    this.senNameDep.set('SECRETARÍA DE HACIENDA Y CRÉDITO PÚBLICO');
+    this.receiveNameConcept.set('');
     //this.sendActEraseLocalStor = true;
     this.sendActEraseLocalStor.next(true);
   }
@@ -89,6 +114,28 @@ export class LayoutDashComponent implements OnDestroy {
     this._snackBar.openFromComponent(SnackBarComponent, {
       data: message, duration: 5500, panelClass: ["snack-notification"], horizontalPosition: "center", verticalPosition: "top",
     });
+  }
+
+  public mediaQuery() {
+
+    this.breakpointObserver
+      .observe([
+        Breakpoints.XSmall,
+        Breakpoints.Small,
+        Breakpoints.Medium,
+        Breakpoints.Large,
+        Breakpoints.XLarge,
+      ])
+      .pipe(takeUntil(this.destroyed))
+      .subscribe(result => {
+        for (const query of Object.keys(result.breakpoints)) {
+          if (result.breakpoints[query]) {
+            this.sizeDisplay.set(this.displayNameMap.get(query) ?? 'Unknown');
+          }
+        }
+      });
+
+
   }
 
 }

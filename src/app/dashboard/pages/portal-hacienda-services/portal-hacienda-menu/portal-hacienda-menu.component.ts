@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute } from '@angular/router';
-import { DataConceptsStruct } from '@dashboard/interfaces/concepts-response-struct.interface';
+import { DataConceptsStruct } from '@shared/interfaces/concepts-response-struct.interface';
 import { LayoutDashComponent } from '@dashboard/layout/layout-dash.component';
 import {HaciendaMenuImagesPipe} from '@dashboard/pipes/hacienda-menu-images.pipe';
 import { ServiciosHaciendaPortalService } from '@dashboard/services/servicios-hacienda-portal.service';
@@ -37,6 +37,9 @@ export class PortalHaciendaMenuComponent implements OnInit, OnDestroy {
   private activRouteSubs?: Subscription;
 
   ngOnInit(): void {
+
+    this.parentLayout.showoptions.set(true);
+
     this.activRouteSubs = this.activRoute.params.subscribe(({ flag }) => {
       if (!flag) {
         this.parentLayout.redirectHome(true);
@@ -77,7 +80,6 @@ export class PortalHaciendaMenuComponent implements OnInit, OnDestroy {
 
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: number): void {
-    //this.valCardDep.emit(this.cardsArr.filter(({pk}) => pk===id))
     this.parentLayout.reciveValCard(this.cardsArr.filter(({ pk }) => pk === id));
   }
 }

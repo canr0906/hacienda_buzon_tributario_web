@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { PortalMenu } from '@dashboard/interfaces/portal-menu.interfaz';
-import { DataConceptsStruct } from '../interfaces/concepts-response-struct.interface';
+import { DataConceptsStruct } from '../../shared/interfaces/concepts-response-struct.interface';
 
 @Pipe({
   name: 'haciendaMenuImages',

@@ -1,1 +1,14 @@
-<p>toolbar works!</p>
+<mat-toolbar class="my-toolbar" color="primary" [class.mat-elevation-z10]="true" >
+  @if (showoptions()) {
+  <button mat-icon-button (click)="redirectPagos()">
+    <mat-icon>home</mat-icon>
+  </button>
+  <button mat-icon-button (click)="sidenavAction()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  }
+  <span
+    [ngStyle]="{'font-size': (viewResolution() == 'XSmall' || viewResolution()=='Small') ? '13px' : '20px'}" style="margin: auto; white-space: initial; text-align: center;">{{receiveNameDep()}}
+  </span>
+  <span></span>
+</mat-toolbar>
