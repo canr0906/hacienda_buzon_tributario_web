@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -13,6 +13,8 @@ import { DataConceptsStruct } from '@shared/interfaces/concepts-response-struct.
 import { UserStruct } from '@auth/interfaces/user-struct.interface';
 import { Subject } from 'rxjs';
 import { ServiciosHaciendaPortalService } from '@dashboard/services/servicios-hacienda-portal.service';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 
 export interface IdPadre {
   padreId: number
@@ -28,39 +30,77 @@ export interface IdPadre {
     MatToolbarModule,
     MatIconModule,
     MatListModule,
-    MatCardModule
+    MatCardModule,
+    MatButtonModule
   ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.css'
 })
-export class SidenavComponent implements AfterViewInit, OnDestroy {
+export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  /* NOTA: RECIBE EL EVENTO DE CERRAR O ABRIR MENU DEL PADRE LAYOUT Y ESTE A AU VEZ LO RECIBE DEL HIJO TOOLBAR */
+  @Input()
+  public reciveActionSideNav: Subject<boolean> = new Subject<boolean>();
+  /* NOTA: RECIBE UN OBJETO DEL PADRE LAYOUT DE LA DEPENDECIA SELECCIONADA POR EL HIJO DEPENDENCIAS-CARD */
+  @Input()
+  public valDependenciaCard: Subject<DataConceptsStruct[]> = new Subject<DataConceptsStruct[]>();
+  /* NOTA: CONTROLA LA ACCION SOBRE EL SIDENAV DE ACUERDO A LA ACCION DEL HERMANO TOOLBAR */
+  @ViewChild('sidenav')
+  public changSidenav!: MatSidenav;
+  /* NOTA: ENVIA AL PADRE EL NOMBRE DEL CONCEPTO SELECCIONADO */
+  @Output()
+  private nameConcept = new EventEmitter<string>();
+  /* NOTA: RECIBE LA ORDEN DEL PADRE PARA BORRAR LA LISTA DE CONCEPTOS */
+  @Input()
+  public eraseLocalStor: Subject<boolean> = new Subject<boolean>();//: boolean = false
 
   /* NOTA: EN LOS MENUS ANIDADOS CONTROLA EL BOTON DE BACK */
   public showBack = signal<boolean>(false);
-
-   /* NOTA: CONTROLA LA VISUALIZACION DEL SPINNER */
-   public isLoading = signal<boolean>(false);
-
+  /* NOTA: CONTROLA LA VISUALIZACION DEL SPINNER */
+  public isLoading = signal<boolean>(false);
   /* MANEJO DE ARREGLO DE CONCEPTOS A MOSTRAR */
   public conceptsArr = signal<DataConceptsStruct[]>([]);
   public showMessage = signal<boolean>(false);
   public showMessage_errReq = signal<boolean>(false);
-
-   /*NOTA: LISTA DE CONCEPTOS DE LA DEPENDENCIA SELECCIONADA */
-   public itemsConceptos = signal<DataConceptsStruct[]>([]);
+  /*NOTA: LISTA DE CONCEPTOS DE LA DEPENDENCIA SELECCIONADA */
+  public itemsConceptos = signal<DataConceptsStruct[]>([]);
 
   private generalService = inject(ServiciosHaciendaPortalService);
+  private router = inject(Router);
 
   /* MANEJO DE LA ESTRUCTURA DE RESPONSE DE USUARIO LOGEADO */
-  private roles: UserStruct = JSON.parse(localStorage.getItem('user')!);
+  private roles: UserStruct = JSON.parse(localStorage.getItem('hbtw_user')!);
 
-  /* NOTA: RECIBE UN OBJETO DEL PADRE LAYOUT DE LA DEPENDECIA SELECCIONADA POR EL HIJO DEPENDENCIAS-CARD */
-  @Input()
-  public valDependenciaCard: Subject<DataConceptsStruct[]> = new Subject<DataConceptsStruct[]>();
+  ngOnInit(): void {
+    /* AL DIR CLICK EN EL ICONO MENU DEL TOOLBAR SE DISPARA ESTA ACCION */
+    this.reciveActionSideNav.subscribe(() => {
+      this.changSidenav.toggle();
+    });
+    /* NOTA: SE EJECUTA CUANDO EN EL TOOLBAR SE PRECIONA HOME  */
+    this.eraseLocalStor.subscribe(() => {
+      //localStorage.clear();
+      localStorage.removeItem('hbtw_contribuyente_only');
+      localStorage.removeItem('hbtw_vehicle_data');
+      localStorage.removeItem('hbtw_vehicle_data_adicional');
+      localStorage.removeItem('hbtw_datos_poliza');
+      localStorage.removeItem('hbtw_datos_cobro');
+      localStorage.removeItem('hbtw_idParent');
+      localStorage.removeItem('hbtw_gestora');
+      localStorage.removeItem('hbtw_route_origen');
+      localStorage.removeItem('hbtw_concept');
+      localStorage.removeItem('hbtw_contribuyente');
+      localStorage.removeItem('hbtw_datos_poliza');
+      localStorage.removeItem('hbtw_repetir_concepto');
+      localStorage.removeItem('hbtw_cachestore');
 
-  /* NOTA: CONTROLA LA ACCION SOBRE EL SIDENAV DE ACUERDO A LA ACCION DEL HERMANO TOOLBAR */
-  @ViewChild('sidenav')
-  public changSidenav!: MatSidenav;
+      this.conceptsArr.set([]);
+      //this.changSidenav.toggle();
+      this.showMessage.set(true);
+      this.showMessage_errReq.set(false);
+      this.showBack.set(false);
+      this.router.navigate(['/dashboard/portal-hacienda-servicios']);//['/pagos']);
+    })
+  }
 
   ngAfterViewInit(): void {
     /*
@@ -69,28 +109,29 @@ export class SidenavComponent implements AfterViewInit, OnDestroy {
     */
     this.valDependenciaCard.subscribe(resp => {
       //this.processChangeOnView(resp[0].padreId);
-      localStorage.removeItem('idParent');
-      this.activeIdParent(resp[0].pk, '0', resp[0].pk);
+      console.log(resp)
+      localStorage.removeItem('hbtw_idParent');
+      this.activeIdParent(resp[0].pk, 0, resp[0].pk);
     });
   }
 
   ngOnDestroy(): void {
-    /*this.reciveActionSideNav.unsubscribe();
-    this.eraseLocalStor.unsubscribe();*/
+    this.reciveActionSideNav.unsubscribe();
+    //this.eraseLocalStor.unsubscribe();
     this.valDependenciaCard.unsubscribe();
   }
 
-  activeIdParent(padreId: number, idConcepto: string, id: number) {
-    let x: IdPadre[] = JSON.parse(localStorage.getItem('idParent_admin')!);
+  activeIdParent(padreId: number, idConcepto: number, id: number) {
+    let x: IdPadre[] = JSON.parse(localStorage.getItem('hbtw_idParent')!);
     if (x) {
       x.push({ 'padreId': padreId });//x.forEach(() => x.push({ 'padreId': padreId }))
-      localStorage.setItem('idParent_admin', JSON.stringify(x));
+      localStorage.setItem('hbtw_idParent', JSON.stringify(x));
     } else {
-      localStorage.setItem('idParent_admin', JSON.stringify([{ padreId: padreId }]));
+      localStorage.setItem('hbtw_idParent', JSON.stringify([{ padreId: padreId }]));
     }
 
-    this.buildMenu((Number(idConcepto) > 0) ? Number(idConcepto) : id);
-    if (JSON.parse(localStorage.getItem('idParent')!).length > 1)
+    this.buildMenu((idConcepto > 0) ? idConcepto : id);
+    if (JSON.parse(localStorage.getItem('hbtw_idParent')!).length > 1)
       this.showBack.set(true);
 
     return;
@@ -98,59 +139,53 @@ export class SidenavComponent implements AfterViewInit, OnDestroy {
 
   buildMenu(padreId: number) {
     this.isLoading.set(true);
-    if (!localStorage.getItem('idParent') || JSON.parse(localStorage.getItem('idParent')!).length <= 1) {
+    if (!localStorage.getItem('hbtw_idParent') || JSON.parse(localStorage.getItem('hbtw_idParent')!).length <= 1) {
       this.showBack.set(false);
     }
     this.generalService.requestConceptos(padreId)
       .subscribe(conceptos => {
+        console.log(conceptos)
         if (conceptos !== undefined) {
           const result = conceptos.filter(resp => resp.rol == 0);
           if (result.length > 0) {
             this.generalService.conceptoStorage = result;
             this.showMessage.set(false);
             this.showMessage_errReq.set(false);
-            this.itemsConceptos.set(result);
+            this.conceptsArr.set(result);//update(() => [...this.conceptsArr(), result]);
             this.isLoading.set(false);
             if (this.changSidenav.opened == false)
               this.changSidenav.toggle();
             return;
           }
 
-          this.itemsConceptos.set([]);
+          this.conceptsArr.set([]);
           this.showMessage.set(true);
           this.isLoading.set(false);
           return;
         }
         this.showMessage_errReq.set(true);
         this.isLoading.set(false);
-        this.itemsConceptos.set([]);
+        this.conceptsArr.set([]);
       });
 
 
   }
 
   backMenu() {
-    /*if (localStorage.getItem('idParent_admin')) {
-      localStorage.removeItem('contribuyente_admin');
-      let idParent: IdPadre[] = JSON.parse(localStorage.getItem('idParent_admin')!);
-      if (idParent.length > 1) {
-        const idControl = idParent[idParent.length - 2].padreId;
-        idParent.pop();
-        if (idParent.length === 1) {
-          localStorage.removeItem('idParent_admin');
-          this.showBack.set(false);
-        }
-        localStorage.setItem('idParent_admin', JSON.stringify(idParent));
-        this.conceptsArr.set([]);
-        if (idParent[idParent.length - 1].padreId === 0) {
-          this.recursiveReq(this.roles.roles, 0, 0);
-          return
-        }
-        this.buidMenuAsync('', idParent[idParent.length - 1].padreId, 0);//this.buidMenuAsync([], idParent[idParent.length - 1].padreId, false);
-        return;
+    if (localStorage.getItem('hbtw_idParent')) {
+      localStorage.removeItem('hbtw_contribuyente');
+      let idParent: IdPadre[] = JSON.parse(localStorage.getItem('hbtw_idParent')!);
+      const idControl = idParent[idParent.length - 2].padreId;
+      idParent.pop();
+      if (idParent.length === 0) {
+        localStorage.removeItem('hbtw_idParent');
+        this.showBack.set(false);
       }
+      localStorage.setItem('hbtw_idParent', JSON.stringify(idParent))
+      this.buildMenu(idControl);
+      this.router.navigate(['/dashboard/portal-hacienda-servicios', true]);
       return;
-    }*/
+    }
     return;
   }
 
@@ -191,46 +226,70 @@ export class SidenavComponent implements AfterViewInit, OnDestroy {
       .catch(error => console.log('ERRRROOOOOOO: ' + error));*/
   }
 
-  actionList(pk: number, idConcepto: number, rol: number, gestora: number, idFath: number) {
-    /*let conceptSelect = this.conceptsArr().filter(concepto => concepto.pk == pk);
-    const roles = JSON.parse(localStorage.getItem('user')!);
+  dellLocalStore() {
+    if (localStorage.getItem('hbtw_contribuyente_only'))
+      localStorage.removeItem('hbtw_contribuyente_only');
+    if (localStorage.getItem('hbtw_vehicle_data'))
+      localStorage.removeItem('hbtw_vehicle_data');
+    if (localStorage.getItem('hbtw_vehicle_data_adicional'))
+      localStorage.removeItem('hbtw_vehicle_data_adicional');
+    if (localStorage.getItem('hbtw_datos_poliza'))
+      localStorage.removeItem('hbtw_datos_poliza');
+    if (localStorage.getItem('hbtw_datos_cobro'))
+      localStorage.removeItem('hbtw_datos_cobro');
+  }
 
-    if (gestora === 0) {
-      this.activeIdParent(pk, idConcepto, pk);
-      this.conceptsArr.set([]);
-      if (idFath === 0)
-        this.buidMenuAsync('', pk, 0, 0);//this.buidMenuAsync([], pk, false)
-      else
-        this.buidMenuAsync(this.roles.roles, pk, 0, 0);
-      if (JSON.parse(localStorage.getItem('idParent_admin')!).length > 1)
-        this.showBack.set(true);
-      return;
-    }
+  buildTitle(concept: string) {
+    localStorage.setItem('hbtw_concept', concept);
+    this.nameConcept.emit(concept);
+  }
 
-    if (this.conceptsArr().filter(resp => resp.idConcepto === idConcepto && resp.combinable == 1).length == 0) {
-      (localStorage.getItem('contribuyente_admin')) ? localStorage.removeItem('contribuyente_admin') : '';
-    }
+  actionList(item: string, concept: string, id: number, idConcepto: string | number, padreId: number, gestora?: number) {
+    /*
+      NOTA:  DETERMINA SI EL CONCEPTO PERMITE AGREGAR MAS CONCEPTOS DE SU SECCION
+    */
+      if (Number(gestora) > 0) {
+        if (this.generalService.conceptoStorage.filter(resp => resp.idConcepto === Number(idConcepto) && resp.combinable == 1).length == 0) {
+          (localStorage.getItem('hbtw_contribuyente')) ? localStorage.removeItem('hbtw_contribuyente') : '';
+        }
+      }
 
-    this.dellLocalStore();
-
-    localStorage.setItem('gestora_admin', String(gestora));
-    localStorage.setItem('route_origen_admin', String(this.conceptsArr().filter(concepto => concepto.pk == pk)[0].url));
-
-    this.isLoading.set(false);
-    this.buildTitle(this.conceptsArr().filter(concepto => concepto.pk == pk)[0].titulo);
-
-    if (idConcepto > 0 || gestora > 0) {
-      this.changSidenav.toggle();
-    }
-
-    if (conceptSelect[0].formulario > 1) {
-      if (conceptSelect[0].formulario === 10 || conceptSelect[0].formulario === 1 || conceptSelect[0].formulario === 17) {
-        this.router.navigate(['/dashboard/' + String(this.conceptsArr().filter(concepto => concepto.pk == pk)[0].url), idConcepto, conceptSelect[0].formulario]);
+      if (new RegExp('^(?:https?):\/\/?').test(item)) {
+        window.open(`${item}`);
         return;
       }
-      this.router.navigate(['/dashboard/' + String(this.conceptsArr().filter(concepto => concepto.pk == pk)[0].url)]);
-      return;
-    }
-    this.router.navigate(['/dashboard/' + String(this.conceptsArr().filter(concepto => concepto.pk == pk)[0].url), idConcepto, conceptSelect[0].formulario]);*/
+
+      this.dellLocalStore();
+
+      localStorage.setItem('hbtw_gestora', String(gestora));
+      localStorage.setItem('hbtw_route_origen', item);
+
+      idConcepto = idConcepto.toString();
+      if (idConcepto === "0" && gestora === 0) {
+        this.activeIdParent(padreId, Number(idConcepto), id);
+        return;
+      }
+      this.isLoading.set(false);
+      this.conceptsArr.set(this.generalService.conceptoStorage);
+      this.buildTitle(concept);
+
+      const conceptSelect: DataConceptsStruct[] = this.conceptsArr().filter(resp => resp.pk == id);
+
+      if (idConcepto !== "0" || gestora! > 0) {
+        this.changSidenav.toggle();
+      }
+
+      if (conceptSelect[0].formulario > 1) {
+        if (conceptSelect[0].formulario === 5 || conceptSelect[0].formulario === 4 || conceptSelect[0].formulario === 3 ||
+          conceptSelect[0].formulario === 6 || conceptSelect[0].formulario === 7 || conceptSelect[0].formulario === 8 ||
+          conceptSelect[0].formulario === 13 || conceptSelect[0].formulario === 14 || conceptSelect[0].formulario === 16 ||
+          conceptSelect[0].formulario === 17 || conceptSelect[0].formulario === 12) {
+          this.router.navigate(['/dashboard/' + item, idConcepto, conceptSelect[0].formulario]);
+          return;
+        }
+        this.router.navigate(['/dashboard/' + item]);
+        return;
+      }
+      this.router.navigate(['/dashboard/' + item, idConcepto, conceptSelect[0].formulario]);
   }
 }

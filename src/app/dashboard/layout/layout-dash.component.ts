@@ -78,8 +78,9 @@ export class LayoutDashComponent implements OnDestroy {
     this.destroyed.unsubscribe();
   }
 
-  /* RECIBE UN OBJETO DE LA DEPENDENCIA SELECIONADA DEL COMPONENTE SERVICE-MENU.COMPONENT */
-  reciveValCard(valCard: DataConceptsStruct[]){//PortalMenu[]) {
+  /* RECIBE UN OBJETO DE LA DEPENDENCIA SELECIONADA DEL COMPONENTE SERVICE-MENU.COMPONENT Y LO TRANSMITE A SIDENAV.COMPONENT */
+  reciveValCard(valCard: DataConceptsStruct[]){
+    console.log(valCard)
     this.valCardSubjectEmitt.next(valCard);
     this.senNameDep.set(valCard[0].titulo);
   }

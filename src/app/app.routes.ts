@@ -39,6 +39,16 @@ export const routes: Routes = [
         title: 'Menu de Portal de Hacienda',
         loadComponent: () => import('./dashboard/pages/portal-hacienda-services/portal-hacienda-menu/portal-hacienda-menu.component').then(c => c.PortalHaciendaMenuComponent),
       },
+      {
+        path: 'smyt/smyt-refrendo',
+        title: 'Pago de Refrendo Vehicular',
+        loadComponent: () => import('./dashboard/pages/portal-hacienda-services/smyt/refrendo/refrendo.component').then(c=>c.RefrendoComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard/sevices-menu',
+        pathMatch: 'full'
+      }
     ]
   },
   {

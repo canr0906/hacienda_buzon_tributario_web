@@ -12,18 +12,19 @@
         <mat-card-content>
           <form [formGroup]="myForm">
             <smyt-vehicle-data
-              [disablesSerie]="true"
-              [disablesValorVenta]="true"
-              [disabledPlaca]="false"
-              [disabledTipoV]="true"
-              [disablesSerieSec]="true"
-              [disableDate]="true"
+              [disablesOffice]="signalTrue"
+              [disablesSerie]="signalFalse"
+              [disablesValorVenta]="signalTrue"
+              [disabledPlaca]="signalFalse"
+              [disabledTipoV]="signalTrue"
+              [disablesSerieSec]="signalTrue"
+              [disableDate]="signalTrue"
             />
           </form>
         </mat-card-content>
         <mat-divider></mat-divider>
         <mat-card-actions align="end">
-          <button mat-stroked-button color="warn" [routerLink]="['/dashboard']">
+          <button mat-stroked-button color="warn" [routerLink]="['/dashboard/portal-hacienda-servicios']">
             <mat-icon>cancel</mat-icon>
             Cancelar
           </button>

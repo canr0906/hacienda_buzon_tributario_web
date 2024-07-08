@@ -50,46 +50,34 @@ export class VehicleDataComponent implements OnInit {
 
   public tipoVehiculoArr = signal<VehicleTypeDataStruct[]>([]);
 
-  public disablesOffice:boolean = false;
 
   @Input({required:true})
-  public disablesSerie:boolean = false;
+  public disablesOffice = signal<boolean>(false);
 
   @Input({required:true})
-  public disablesValorVenta:boolean = false;
+  public disablesSerie= signal<boolean>(false);
 
   @Input({required:true})
-  public disabledPlaca:boolean = false;
+  public disablesValorVenta= signal<boolean>(false);
 
   @Input({required:true})
-  public disabledTipoV:boolean = false;
+  public disabledPlaca= signal<boolean>(false);
 
   @Input({required:true})
-  public disablesSerieSec:boolean = false;
+  public disabledTipoV= signal<boolean>(false);
 
   @Input({required:true})
-  public disableDate:boolean = false;
+  public disablesSerieSec= signal<boolean>(false);
+
+  @Input({required:true})
+  public disableDate= signal<boolean>(false);
 
   @Output()
   private tipoVehiculoEmit = new EventEmitter<number>();
 
 
   private fb = inject(FormBuilder);
-  public myFormSmyt: FormGroup = this.fb.group({
-    oficina:       [{value:'',disabled:!this.disablesOffice}, [Validators.required]],
-    tipo_vehiculo: [{value:'',disabled:!this.disabledTipoV},[Validators.required]],
-    placa:         [{value:'',disabled:!this.disabledPlaca}, [Validators.required]],
-    serie:         [{value:'',disabled:!this.disablesSerie}, [Validators.required]],
-    seriesec:      [{value:'',disabled:!this.disablesSerieSec},[Validators.required]],
-    valor_venta:   [{value:'',disabled:!this.disablesValorVenta}, [Validators.required, Validators.min(40)]],
-    fecha_factura: [new Date(),[Validators.required, this.validatorsService.cantBeGreat]]
-  },{
-    validators: [
-      this.smytService.existsPlaca('placa',1, 1, '1'),
-      this.smytService.existsSerie('placa','serie',3, 2, '1'),
-      this.validatorsService.isFieldOneEqualFielTwo('serie', 'seriesec',1),
-    ]
-  });
+  public myFormSmyt!: FormGroup;
 
   public officeList = signal<OfficeDataStruct[]>([]);
   public mssgArr = signal<MessageStruct[]>(MessagesLists.smyt_alta_vehiculo);
@@ -104,12 +92,28 @@ export class VehicleDataComponent implements OnInit {
     private _intl: MatDatepickerIntl,
     @Inject(MAT_DATE_LOCALE) private _locale: string,
   ) {
-
+    this.myFormSmyt = this.fb.group({
+      oficina:       [{value:'',disabled:true}, [Validators.required]],
+      tipo_vehiculo: [{value:'',disabled:true},[Validators.required]],
+      placa:         [{value:'',disabled:true}, [Validators.required]],
+      serie:         [{value:'',disabled:true}, [Validators.required]],
+      seriesec:      [{value:'',disabled:true},[Validators.required]],
+      valor_venta:   [{value:'',disabled:true}, [Validators.required, Validators.min(40)]],
+      fecha_factura: [new Date(),[Validators.required, this.validatorsService.cantBeGreat]]
+    },{
+      validators: [
+        this.smytService.existsPlaca('placa',1, 1, '1'),
+        this.smytService.existsSerie('placa','serie',3, 2, '1'),
+        this.validatorsService.isFieldOneEqualFielTwo('serie', 'seriesec',1),
+      ]
+    });
   }
 
   ngOnInit(): void {
     this._locale = 'es';
     this._adapter.setLocale(this._locale);
+
+    console.log('VALOR DE OFICINA:::' + this.disablesOffice())
 
     this.smytService.getOficinas()
       .subscribe({

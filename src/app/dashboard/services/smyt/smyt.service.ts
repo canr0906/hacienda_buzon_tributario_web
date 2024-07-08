@@ -96,17 +96,7 @@ export class SmytService {
               formGroup.get(placa)?.setErrors({ notEqual: true, error: mssg });
               return { notEqual: true };
             }
-          }
-
-            /*resp => {
-            console.log(resp);
-            if (resp?.success) {
-              formGroup.get(serie)?.setErrors( null );
-              return null;
-            }
-            formGroup.get(serie)?.setErrors( { notEqual: true, error:mssg } );
-            return { notEqual: true };
-          }*/);
+          });
       }
 
       formGroup.get(placa)?.markAsTouched();

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ConceptsResponseStruct, DataConceptsStruct } from '@dashboard/interfaces/concepts-response-struct.interface';
+import { ConceptsResponseStruct, DataConceptsStruct } from '@shared/interfaces/concepts-response-struct.interface';
 import { environments } from '@environments/environments';
 import { catchError, map, Observable, of } from 'rxjs';
 

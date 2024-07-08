@@ -42,20 +42,25 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
 
   public myForm: FormGroup = this.fb.group({});
 
+  public signalTrue = signal<boolean>(true);
+  public signalFalse = signal<boolean>(false);
+
   @ViewChild(VehicleDataComponent)
   private childComponent!: VehicleDataComponent;
 
   ngOnInit(): void {
-    this.conceptTitle.set(localStorage.getItem('concept_admin')!);
+    this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
   }
   ngAfterContentInit(): void {
     setTimeout(() => {
       this.myForm.addControl('primary_form', this.childComponent.myFormSmyt);
       this.childComponent.myFormSmyt.setParent(this.myForm);
 
-      this.myForm.markAllAsTouched();
+      //this.myForm.markAllAsTouched();
 
       this.myForm.get('primary_form')!.get('placa')!.enable();
+      this.myForm.get('primary_form')!.get('oficina')!.enable();
+      this.myForm.get('primary_form')!.get('serie')!.enable();
     },200);
   }
 
@@ -70,7 +75,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
       "tramite": 1,
       "obtenerContribuyente": true
     }
-    localStorage.setItem('vehicle_data_admin', JSON.stringify(reqData));
+    localStorage.setItem('hbtw_vehicle_data_admin', JSON.stringify(reqData));
     this.smytService.validateVehicle(reqData)
       .subscribe(resp => {
         if (resp?.success) {
