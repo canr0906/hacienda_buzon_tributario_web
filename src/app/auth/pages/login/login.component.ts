@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card'
 import { MatDividerModule } from '@angular/material/divider';
@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 //import { AuthService } from '../../services/auth-service.service';
 import { Router, RouterModule  } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,7 +26,8 @@ import { ValidationService } from '@auth/services/validation.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSlideToggleModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -39,17 +41,20 @@ export class LoginComponent {
 
   private loginRequest = signal<LoginRequestStruct>({} as LoginRequestStruct);
 
+  public slideToggleControl = signal<boolean>(false);
+
   private fb = inject(FormBuilder);
   public myForm: FormGroup = this.fb.group(
     {
       rfc: ['', [Validators.required]], //Validators.email] ],
-      curp: ['', [Validators.required]],
-      password: ['12345', [Validators.required, Validators.minLength(5)]]
-    },
-    {
-      validators: [this.validationService.validatorsFactory('curp','rfc')]
+      curp: [{value: '', disabled: true}, [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(5)]]
     }
   );
+
+  @HostListener('input', ['$event']) onKeyUp(event: any) {
+    event.target['value'] = event.target['value'].toUpperCase();
+  }
 
   login(): void {
     if (this.myForm.invalid) {
@@ -65,15 +70,35 @@ export class LoginComponent {
     this.authService.login(this.loginRequest())
       .subscribe({
         next: (resp) => {
-          if (resp.success) {
+          if (Object.keys(resp.user).length>0) {
             this.router.navigateByUrl('dashboard');
             return;
           }
-          Swal.fire('Error', String(resp.data.mensaje), 'error');
+          Swal.fire('Error', "No se encontro informacion con las credenciales proporcionadas.", 'error');
         },
         error: (message) => {
           Swal.fire('Error', message, 'error');
         }
       });
+  }
+
+  changeTaxData(event:boolean) {
+    this.slideToggleControl.set(event);
+    if(event) {
+      this.disabledEnabledElement(['rfc'],['curp']);
+      this.myForm.get('observaciones')?.enable();
+      return;
+    }
+    this.disabledEnabledElement(['curp'],['rfc']);
+      return;
+  }
+
+  disabledEnabledElement(element:string[],enabledElement:string[]) {
+    element.forEach(element => {
+      this.myForm.get(element)?.disable();
+    });
+    enabledElement.forEach(element => {
+      this.myForm.get(element)?.enable();
+    });
   }
 }

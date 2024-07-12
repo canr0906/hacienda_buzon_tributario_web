@@ -22,12 +22,9 @@ export class ValidationService {
       if(formGroup.get(fielOneValidate)?.valid) {
         formGroup.get(fieldTwoValidate)?.setValidators(null);
         formGroup.get(fieldTwoValidate)?.updateValueAndValidity();
-        return null;
-      }
-      if(formGroup.get(fieldTwoValidate)?.valid) {
+      } else if(formGroup.get(fieldTwoValidate)?.valid) {
         formGroup.get(fielOneValidate)?.setValidators(null);
         formGroup.get(fielOneValidate)?.updateValueAndValidity();
-        return null;
       }
       return null;
     }

@@ -6,6 +6,8 @@ import {environments } from "@environments/environments";
 import { UserStruct } from '@auth/interfaces/user-struct.interface';
 import { AuthStatusStruct } from '@auth/interfaces/auth-status-struct.enum';
 import { LoginRequestStruct } from '@auth/interfaces/login-request-struct';
+import { DataEncrypt } from '@shared/classes/data-encrypt';
+import { DataDecrypt } from '@shared/classes/data-decrypt';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +17,10 @@ export class AuthServiceService {
   private http = inject(HttpClient);
 
   private readonly baseUrlApi: string = environments.BASE_URL_APIREST;
+  private readonly urlApiRestNest: string = environments.URL_SERVICIOSHACIENDA_NEST;
+
+  private readonly userApiRest: string = environments.USER_SERVER_APIREST;
+  private readonly passApiRest: string = environments.PASS_SERVER_APIREST;
 
   private _currentUser = signal<UserStruct|null>(null);
   private _authStatus = signal<AuthStatusStruct>( AuthStatusStruct.checking );
@@ -28,12 +34,16 @@ export class AuthServiceService {
   }
 
   /* ALMACENA EN LOCALSTORA LA ESTRUCTURA RETORNADA POR APIREST Y PONE EL STATUS DE DE AUTENTIFICACION EN AUTENTICADO */
-  private setAuthentication(user: UserStruct): boolean {
+  async setAuthentication(user: UserStruct): Promise<boolean> {
     this._currentUser.set(user);
     this._authStatus.set(AuthStatusStruct.authenticated);
 
     if(!localStorage.getItem('user')) {
-      localStorage.setItem('user',JSON.stringify(user));
+      let encript = new DataEncrypt(user);
+      await encript.dataEncript('user')
+        .then(resp =>{
+          console.log()
+        });
     }
 
     return true;
@@ -52,23 +62,41 @@ export class AuthServiceService {
   }
 
   login(loginRequest: LoginRequestStruct): Observable<LoginResponseStruct> {
-    const url = `${this.baseUrlApi}miPortalSH/autentificarUsuario`;
+    const url = `${this.urlApiRestNest}auth/login`;//miPortalSH/autentificarUsuario`;
     let headers = new HttpHeaders();
     //const body = {"user":email,"pass":password}
     headers = headers.set("Content-Type", "application/json")
-    //.set("Authorization", "Basic " + btoa(`${environments.USER_SERVER}:${environments.PASS_SERVER}`));
+    .set("Authorization", "Basic " + btoa(`${this.userApiRest}:${this.passApiRest}`));
+
     return this.http.post<LoginResponseStruct>(url,JSON.stringify(loginRequest),{headers})
       .pipe(
         tap(resp => console.log(resp)),
         map(data => {
-          if(data.success) {
-            this.setAuthentication(data.data)
+          if(Object.keys(data.user).length>0) {
+            this.setAuthentication(data.user)
+            new DataEncrypt(data.token).dataEncript('token')
+              .then(resp=>{
+                new DataDecrypt(localStorage.getItem('token')!).dataDecrypt()
+                  .then(res => {
+                    console.log("Valor del Token:::");
+                    console.log(resp)
+                  })
+
+              });
           }
           return data
         }),//({user, token}) => this.setAuthentication(user,token)),
         //TODO: Errores
         catchError( err =>{
-          return throwError( () => 'Error en la petición al servidor ');
+          let message = '';
+          return throwError( () => {
+            if(typeof err.error.message == 'object') {
+              Object.keys(err.error.message).map(key => message += err.error.message[key]);
+            } else {
+              message = err.error.message;
+            }
+            return message;
+          });
         })
       );
   }

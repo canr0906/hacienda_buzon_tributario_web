@@ -1,26 +1,32 @@
 <mat-card class="shadow-8 m-3">
   <mat-card-header>
-    <mat-card-title>
-      <span class="login100-form login100-form-title p-b-15">
-        Login
-      </span>
-    </mat-card-title>
+    <mat-card-title-group>
+      <mat-card-title>
+        <span class="login100-form login100-form-title p-b-15">Login</span>
+      </mat-card-title>
+      <mat-card-subtitle></mat-card-subtitle>
+      <mat-slide-toggle color="primary" (change)="changeTaxData($event.checked)" >Validar por CURP</mat-slide-toggle>
+    </mat-card-title-group>
   </mat-card-header>
   <mat-divider class="mt-2 mb-2"></mat-divider>
   <mat-card-content>
     <form [formGroup]="myForm">
-      <mat-form-field class="flex justify-content-center" appearance="outline">
+      @if (!slideToggleControl()) {
+      <mat-form-field class="flex justify-content-center" appearance="outline" [style]="slideToggleControl()?'display:none':'display:inline'">
         <mat-label>RFC</mat-label>
         <input matInput formControlName="rfc" type="text" placeholder="RFC...." />
         <mat-icon matSuffix>fingerprint</mat-icon>
         <mat-error>Campo requerido</mat-error>
       </mat-form-field>
+      }
+      @if (slideToggleControl()) {
       <mat-form-field class="flex justify-content-center" appearance="outline">
         <mat-label>CURP</mat-label>
         <input matInput formControlName="curp" type="text" placeholder="CURP..." />
         <mat-icon matSuffix>fingerprint</mat-icon>
         <mat-error>Campo requerido</mat-error>
       </mat-form-field>
+      }
       <mat-form-field class="flex justify-content-center" appearance="outline">
         <mat-label>CONTRASEÑA</mat-label>
         <input matInput formControlName="password" type="password" placeholder="Contraseña" />
