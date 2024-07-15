@@ -14,6 +14,7 @@ import { AuthServiceService } from '@auth/services/auth-service.service';
 import { LoginRequestStruct } from '@auth/interfaces/login-request-struct';
 import Swal from 'sweetalert2';
 import { ValidationService } from '@auth/services/validation.service';
+import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
 
 @Component({
   selector: 'app-login',
@@ -70,8 +71,9 @@ export class LoginComponent {
     this.authService.login(this.loginRequest())
       .subscribe({
         next: (resp) => {
-          if (Object.keys(resp.user).length>0) {
-            this.router.navigateByUrl('dashboard');
+          console.log( resp.mensaje )
+          if(resp.success) {
+            this.router.navigateByUrl('dashboard/sevices-menu');
             return;
           }
           Swal.fire('Error', "No se encontro informacion con las credenciales proporcionadas.", 'error');

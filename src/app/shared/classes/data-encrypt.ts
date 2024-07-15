@@ -12,7 +12,7 @@ export class DataEncrypt {
   async dataEncript(nameLocal:string):Promise<boolean|null> {
     try {
       const dataencrypt = CryptoJS.AES.encrypt(JSON.stringify(this.dataStruct), this.secretKey).toString();
-      localStorage.setItem(nameLocal,dataencrypt);
+      sessionStorage.setItem(nameLocal,dataencrypt);
       return true;
     } catch(error) {
       throw new Error('Valid token not returned');

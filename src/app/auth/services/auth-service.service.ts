@@ -8,6 +8,7 @@ import { AuthStatusStruct } from '@auth/interfaces/auth-status-struct.enum';
 import { LoginRequestStruct } from '@auth/interfaces/login-request-struct';
 import { DataEncrypt } from '@shared/classes/data-encrypt';
 import { DataDecrypt } from '@shared/classes/data-decrypt';
+import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -38,9 +39,9 @@ export class AuthServiceService {
     this._currentUser.set(user);
     this._authStatus.set(AuthStatusStruct.authenticated);
 
-    if(!localStorage.getItem('user')) {
+    if(!sessionStorage.getItem('hbtw_user')) {
       let encript = new DataEncrypt(user);
-      await encript.dataEncript('user')
+      await encript.dataEncript('hbtw_user')
         .then(resp =>{
           console.log()
         });
@@ -61,12 +62,14 @@ export class AuthServiceService {
     return of(true);
   }
 
-  login(loginRequest: LoginRequestStruct): Observable<LoginResponseStruct> {
+  login(loginRequest: LoginRequestStruct): Observable<ResponseGeneral> {
     const url = `${this.urlApiRestNest}auth/login`;//miPortalSH/autentificarUsuario`;
     let headers = new HttpHeaders();
     //const body = {"user":email,"pass":password}
     headers = headers.set("Content-Type", "application/json")
     .set("Authorization", "Basic " + btoa(`${this.userApiRest}:${this.passApiRest}`));
+
+    let generalResponse: ResponseGeneral = {} as ResponseGeneral;
 
     return this.http.post<LoginResponseStruct>(url,JSON.stringify(loginRequest),{headers})
       .pipe(
@@ -76,24 +79,30 @@ export class AuthServiceService {
             this.setAuthentication(data.user)
             new DataEncrypt(data.token).dataEncript('token')
               .then(resp=>{
-                new DataDecrypt(localStorage.getItem('token')!).dataDecrypt()
-                  .then(res => {
-                    console.log("Valor del Token:::");
-                    console.log(resp)
-                  })
-
+                if(resp) {
+                  generalResponse.mensaje = "Logeo Exitoso";
+                  generalResponse.success = true;
+                } else {
+                  generalResponse.mensaje = "Error en Login";
+                  generalResponse.success = false;
+                }
               });
           }
-          return data
+          console.log(generalResponse)
+          return generalResponse;
         }),//({user, token}) => this.setAuthentication(user,token)),
         //TODO: Errores
         catchError( err =>{
           let message = '';
           return throwError( () => {
-            if(typeof err.error.message == 'object') {
-              Object.keys(err.error.message).map(key => message += err.error.message[key]);
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
             } else {
-              message = err.error.message;
+              message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
             }
             return message;
           });
