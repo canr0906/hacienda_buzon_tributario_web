@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import {MatMenuModule} from '@angular/material/menu';
+import { AuthServiceService } from '@auth/services/auth-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'hacienda-toolbar',
@@ -11,12 +14,13 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     CommonModule,
     MatToolbarModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatMenuModule
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.css'
 })
-export class ToolbarComponent {
+export class ToolbarComponent implements OnInit {
 
  /* LAYOUT INDICA LA RESOLUCION */
  @Input()
@@ -41,6 +45,15 @@ export class ToolbarComponent {
   @Input()
   public showoptions = signal<boolean>(true);
 
+  private servicesAuth = inject(AuthServiceService);
+  private router = inject(Router);
+  public existSessioStore = signal<boolean>(false);
+
+  ngOnInit(): void {
+    if(sessionStorage.getItem('hbtw_token')) {
+      this.existSessioStore.set(true)
+    }
+  }
 
 
   redirectPagos(): void{
@@ -51,5 +64,11 @@ export class ToolbarComponent {
     this.controlElemnentMenu=!this.controlElemnentMenu
     /* EMITE VALORES BOOLEAN AL PADRE LAYOUT PAR INDICARLE QUE SE CLICKIO MENU */
     this.openOrCloseSidenav.emit(!this.controlElemnentMenu);
+  }
+
+  logout():void {
+    console.log('Logout');
+    this.servicesAuth.logout();
+    this.router.navigateByUrl('auth');
   }
 }

@@ -15,7 +15,7 @@ export class DataEncrypt {
       sessionStorage.setItem(nameLocal,dataencrypt);
       return true;
     } catch(error) {
-      throw new Error('Valid token not returned');
+      throw new Error('No fue posible almacenar la información de manera local, favor de contactar al CAT e intentarlo nuevmanete ');
     }
   }
 

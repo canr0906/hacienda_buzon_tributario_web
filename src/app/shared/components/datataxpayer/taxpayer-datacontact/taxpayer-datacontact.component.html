@@ -1,0 +1,71 @@
+<div class="" [formGroup]="formTaxPayContact" #chiltTaxPayContact>
+  <mat-accordion class="example-headers-align" [multi]="true" #accordion="matAccordion">
+    <mat-expansion-panel [expanded]="stepContact() === 0" (opened)="setStepContact(0)" >
+      <mat-expansion-panel-header >
+        <mat-panel-title>Teléfonos</mat-panel-title>
+      </mat-expansion-panel-header>
+      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewPhone()" [disabled]="arrPhoneNum.length>=3">
+        <mat-icon>add_circle </mat-icon>
+      </button>
+      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="removeArrPhone()" [disabled]="arrPhoneNum.length==1">
+        <mat-icon>do_not_disturb_on </mat-icon>
+      </button>
+      <br>
+      <table formGroupName="arrPhone">
+        @for (numelement of arrPhoneType.controls; track $index) {
+          <tr>
+            <td>
+              <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrPhoneType">
+                <mat-label>Tipo de contacto</mat-label>
+                <input matInput type="text" [formControlName]="$index">
+                <mat-error>Dato requerido</mat-error>
+              </mat-form-field>
+            </td>
+
+            <td>
+              <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrPhoneNum">
+                <mat-label>Clave lada + Teléfono</mat-label>
+                <input matInput type="text" [formControlName]="$index">
+                <mat-error>Dato requerido</mat-error>
+              </mat-form-field>
+            </td>
+          </tr>
+        }
+      </table>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [expanded]="stepContact() === 1" (opened)="setStepContact(1)" >
+      <mat-expansion-panel-header >
+        <mat-panel-title>Correo Electrónico</mat-panel-title>
+      </mat-expansion-panel-header>
+      <button mat-mini-fab type="button" (click)="addNewEmail()" [disabled]="arrEmailDir.length>=3">
+        <mat-icon>add_circle </mat-icon>
+      </button>
+      <button mat-mini-fab type="button" (click)="removeArrEmail()" [disabled]="arrEmailDir.length==1">
+        <mat-icon>do_not_disturb_on </mat-icon>
+      </button>
+      <br>
+      <table formGroupName="arrEmail">
+        @for (numelement of arrEmailType.controls; track $index) {
+          <tr>
+            <td>
+              <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrEmailType">
+                <mat-label>Tipo de contacto</mat-label>
+                <input matInput type="text" [formControlName]="$index">
+                <mat-error>Dato requerido</mat-error>
+              </mat-form-field>
+            </td>
+
+            <td>
+              <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrEmailDir">
+                <mat-label>Correo</mat-label>
+                <input matInput type="text" [formControlName]="$index">
+                <mat-error>Dato requerido</mat-error>
+              </mat-form-field>
+            </td>
+          </tr>
+        }
+      </table>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

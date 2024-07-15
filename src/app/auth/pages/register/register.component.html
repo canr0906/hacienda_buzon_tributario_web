@@ -14,42 +14,59 @@
       <mat-card-content class="mt-5">
         <form class="example-form" ><!--[formGroup]="myForm">-->
           <mat-accordion class="example-headers-align" [multi]="true" #accordion="matAccordion">
-            <mat-expansion-panel ><!--[expanded]="step === 0" (opened)="setStep(0)">-->
+            <mat-expansion-panel [expanded]="step() === 0" (opened)="setStep(0)" >
               <mat-expansion-panel-header>
-                <mat-panel-description>
+                <mat-panel-title>
                   Datos Generales
-                </mat-panel-description>
+                </mat-panel-title>
               </mat-expansion-panel-header>
               <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
               <hacienda-taxpayer-daata />
               <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
             </mat-expansion-panel>
 
-            <mat-expansion-panel >
+            <mat-expansion-panel [expanded]="step() === 1" (opened)="setStep(1)" >
               <mat-expansion-panel-header>
-                <mat-panel-description>
+                <mat-panel-title>
                   Datos de Contacto
-                </mat-panel-description>
+                </mat-panel-title>
               </mat-expansion-panel-header>
-              <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
-              <hacienda-taxpayer-daata />
+              <!-- SE INCLUYE EL COMPONENTE TAXPAYER-DATACONTACT -->
+              <hacienda-taxpayer-datacontact />
               <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
             </mat-expansion-panel>
 
-            <mat-expansion-panel ><!--[expanded]="step === 0" (opened)="setStep(0)">-->
+            <mat-expansion-panel [expanded]="step() === 2" (opened)="setStep(2)" >
               <mat-expansion-panel-header>
-                <mat-panel-description>
+                <mat-panel-title>
                   Contribuciones Recurrentes
-                </mat-panel-description>
+                </mat-panel-title>
               </mat-expansion-panel-header>
-              <!-- SE INCLUYE EL COMPONENTE TAXPAYER -->
-              <hacienda-taxpayer-daata />
+              <!-- SE INCLUYE EL COMPONENTE TAXPAYER-RECURRENTCONTRIB -->
+              <hacienda-taxpayer-recurrentcontrib />
               <!--<form-alta-vehiculo (tipoVehiculoEmit)="updateFiel($event)"></form-alta-vehiculo>-->
             </mat-expansion-panel>
 
           </mat-accordion>
         </form>
       </mat-card-content>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-actions align="end">
+        <button mat-stroked-button mat-raised color="warn"
+          routerLink="/dashboard"><!--[routerLink]="['/pagos']"-->
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <span class=""></span>
+        <button [disabled]="this.myFormReg.invalid" mat-stroked-button mat-raised color="primary"
+          (click)="registerUser()">
+          <mat-icon>cloud_upload</mat-icon>
+          Guardar
+        </button>
+      </mat-card-actions>
+
     </mat-card>
   </div>
   <!--<div class="col-4" *ngIf="sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall'">

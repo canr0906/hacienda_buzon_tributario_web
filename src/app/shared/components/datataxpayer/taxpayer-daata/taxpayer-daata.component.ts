@@ -12,7 +12,7 @@ import { Router, RouterModule  } from '@angular/router';
 
 
 import { GeneralService } from '@shared/services/general.service';
-import { SnackBarComponent } from '../snack-bar/snack-bar.component';
+import { SnackBarComponent } from '../../snack-bar/snack-bar.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { listaMunicipiosStruct } from '@shared/interfaces/municipios-response-struct.interfaz';
 import { MatInputModule } from '@angular/material/input';
@@ -78,10 +78,7 @@ export class TaxpayerDaataComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    /*
-      OBTIENE LISTA DE ENTIDADES FEDERATIVAS
-      MODIF: 12/12/2023
-    */
+    /* OBTIENE LISTA DE ENTIDADES FEDERATIVAS */
       this.generalService.getEntidadesFederativas().subscribe(resp => {
         if(!resp){
           this.openSnackBar('Problema con el API-SERVER, favor de contactar a Servicio Técnico ');

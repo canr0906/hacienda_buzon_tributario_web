@@ -1,5 +1,7 @@
 import { Component, HostListener, inject, signal } from '@angular/core';
 
+import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
+
 import { MatCardModule } from '@angular/material/card'
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+
 //import { AuthService } from '../../services/auth-service.service';
 import { Router, RouterModule  } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -22,6 +25,7 @@ import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
   imports: [
     ReactiveFormsModule,
     RouterModule,
+    LoadSpinnerComponent,
     MatCardModule,
     MatDividerModule,
     MatFormFieldModule,
@@ -44,6 +48,9 @@ export class LoginComponent {
 
   public slideToggleControl = signal<boolean>(false);
 
+  /* CONTROLA LA VISUALIZACION DEL SPINNER */
+  public isLoading = signal<boolean>(false);
+
   private fb = inject(FormBuilder);
   public myForm: FormGroup = this.fb.group(
     {
@@ -62,6 +69,7 @@ export class LoginComponent {
       this.myForm.markAllAsTouched();
       return;
     }
+    this.isLoading.set(true);
     const { user, password } = this.myForm.value;
     if(this.myForm.get('curp')?.valid && this.myForm.get('curp')?.value !== '') {
       this.tipo_identificaion.set("2");
@@ -71,7 +79,9 @@ export class LoginComponent {
     this.authService.login(this.loginRequest())
       .subscribe({
         next: (resp) => {
-          console.log( resp.mensaje )
+          this.isLoading.set(false);
+          console.log( sessionStorage.getItem('hbtw_token') )
+          console.log(resp.success)
           if(resp.success) {
             this.router.navigateByUrl('dashboard/sevices-menu');
             return;
@@ -79,7 +89,12 @@ export class LoginComponent {
           Swal.fire('Error', "No se encontro informacion con las credenciales proporcionadas.", 'error');
         },
         error: (message) => {
+          this.isLoading.set(false);
           Swal.fire('Error', message, 'error');
+        },
+        complete: () => {
+          console.log(sessionStorage.getItem('hbtw_token'))
+          console.log("TERMINO LA EJECUSION")
         }
       });
   }

@@ -13,7 +13,7 @@ export class DataDecrypt {
       const stringData = JSON.parse(datadecrypt.toString(CryptoJS.enc.Utf8));
       return stringData;
     } catch(error) {
-      throw new Error('Valid token not returned::'+error);
+      throw new Error('No fue posible desencriptar la información favor de contactar al CAT');
     }
   }
 

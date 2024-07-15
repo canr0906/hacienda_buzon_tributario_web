@@ -8,6 +8,7 @@ import PortalMenuArr from '@shared/data/portal-menu.json'
 import {ServicesMenuImagesPipe} from '@dashboard/pipes/services-menu-images.pipe';
 import { LayoutDashComponent } from '@dashboard/layout/layout-dash.component';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: true,
@@ -38,9 +39,12 @@ export class ServicesMenuComponent implements OnInit {
 
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: string): void {
-    //this.valCardDep.emit(this.cardsArr.filter(({pk}) => pk===id))
-    //this.parentLayout.reciveValCard(this.cardsArr.filter(({ pk }) => pk === id));
-    console.log('/dashboard/'+id)
+    if(id.includes('buzon-tributario')) {
+      if(!sessionStorage.getItem('hbtw_token')) {
+        Swal.fire('Error', "Para tener acceso a este modulo necesita generar un registro", 'error');
+        return;
+      }
+    }
     this.router.navigate(['/dashboard/'+id]);
   }
 }

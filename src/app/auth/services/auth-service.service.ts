@@ -41,10 +41,7 @@ export class AuthServiceService {
 
     if(!sessionStorage.getItem('hbtw_user')) {
       let encript = new DataEncrypt(user);
-      await encript.dataEncript('hbtw_user')
-        .then(resp =>{
-          console.log()
-        });
+      encript.dataEncript('hbtw_user');
     }
 
     return true;
@@ -76,19 +73,13 @@ export class AuthServiceService {
         tap(resp => console.log(resp)),
         map(data => {
           if(Object.keys(data.user).length>0) {
-            this.setAuthentication(data.user)
-            new DataEncrypt(data.token).dataEncript('token')
-              .then(resp=>{
-                if(resp) {
-                  generalResponse.mensaje = "Logeo Exitoso";
-                  generalResponse.success = true;
-                } else {
-                  generalResponse.mensaje = "Error en Login";
-                  generalResponse.success = false;
-                }
-              });
+            generalResponse.mensaje = 'ok';
+            generalResponse.success= true;
+            /* ENVIA DATOS DEL USUARIO PARA ALMACENARLOS EN SESSIONSTORAGE Y MANEJAR STATUS DE LOGION O NO EN LA APP */
+            this.setAuthentication(data.user);
+            /* SE ENVIA EL TOKEN PAR SER ALMACENADO EN SESSIONSTORAGE */
+            new DataEncrypt(data.token).dataEncript('hbtw_token');
           }
-          console.log(generalResponse)
           return generalResponse;
         }),//({user, token}) => this.setAuthentication(user,token)),
         //TODO: Errores
@@ -111,16 +102,7 @@ export class AuthServiceService {
   }
 
   logout(): void {
-    //sessionStorage.removeItem('token');//localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('gestora_admin');
-    localStorage.removeItem('route_origen_admin');
-    localStorage.removeItem('concept_admin');
-    localStorage.removeItem('vehicle_data_admin');
-    localStorage.removeItem('vehicle_data_adicional_admin');
-    localStorage.removeItem('contribuyente_admin');
-    localStorage.removeItem('datos_poliza_admin');
-    localStorage.removeItem('idParent_admin');
+    sessionStorage.clear();
     this._currentUser.set(null);
     this._authStatus.set( AuthStatusStruct.notAuthenticated );
   }

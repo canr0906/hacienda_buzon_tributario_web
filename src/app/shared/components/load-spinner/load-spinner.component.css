@@ -17,7 +17,16 @@ span {
 
 }*/
 
-
+.darken {
+  background: rgba(0, 0, 0, 0.7);
+  display: block;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 80;
+  height: 100%;
+  width: 100%;
+}
 
 .loader {
   height: 20px;

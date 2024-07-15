@@ -11,4 +11,19 @@
     [ngStyle]="{'font-size': (viewResolution() == 'XSmall' || viewResolution()=='Small') ? '13px' : '20px'}" style="margin: auto; white-space: initial; text-align: center;">{{receiveNameDep()}}
   </span>
   <span></span>
+  <div>
+    <button mat-icon-button [matMenuTriggerFor]="menu" [style]="existSessioStore()?'display:inline':'display:none'">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>edit_note</mat-icon>
+        <span>Editar Cuenta</span>
+      </button>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
 </mat-toolbar>
