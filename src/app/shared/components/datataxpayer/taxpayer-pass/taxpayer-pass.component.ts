@@ -1,12 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
-  selector: 'app-taxpayer-pass',
+  selector: 'hacienda-taxpayer-pass',
   standalone: true,
-  imports: [],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './taxpayer-pass.component.html',
   styleUrl: './taxpayer-pass.component.css'
 })
 export class TaxpayerPassComponent {
 
+  private fb = inject(FormBuilder);
+  public formTaxPayPass: FormGroup = this.fb.group({
+    password: ['', [Validators.required]],
+    confpass: ['', [Validators.required]]
+  });
 }

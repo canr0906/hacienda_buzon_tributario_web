@@ -1,1 +1,15 @@
-<p>taxpayer-pass works!</p>
+<div class="" [formGroup]="formTaxPayPass" #chiltTaxPayPass>
+  <div class="example-form-fields">
+    <mat-form-field fxFlex class="flex justify-content-center" appearance="outline">
+      <mat-label>CONTRASEÑA</mat-label>
+      <input matInput formControlName="password" type="password" placeholder="Contraseña" />
+      <mat-error>Campo requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field  fxFlex class="flex justify-content-center" style="padding-left: 0.5em;" appearance="outline">
+      <mat-label>CONTRASEÑA</mat-label>
+      <input matInput formControlName="confpass" type="password" placeholder="Contraseña" />
+      <mat-error>Campo requerido</mat-error>
+    </mat-form-field>
+  </div>
+</div>

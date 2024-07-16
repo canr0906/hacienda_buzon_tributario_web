@@ -101,6 +101,10 @@ export class AuthServiceService {
       );
   }
 
+  registerTaxPayer() {
+
+  }
+
   logout(): void {
     sessionStorage.clear();
     this._currentUser.set(null);

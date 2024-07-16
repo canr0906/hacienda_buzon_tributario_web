@@ -4,20 +4,24 @@
       <mat-expansion-panel-header >
         <mat-panel-title>Teléfonos</mat-panel-title>
       </mat-expansion-panel-header>
-      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewPhone()" [disabled]="arrPhoneNum.length>=3">
+      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewPhone()" [disabled]="arrPhoneNum.length>=3 || !arrPhoneNum.valid">
         <mat-icon>add_circle </mat-icon>
       </button>
       <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="removeArrPhone()" [disabled]="arrPhoneNum.length==1">
         <mat-icon>do_not_disturb_on </mat-icon>
       </button>
-      <br>
+      <br><br>
       <table formGroupName="arrPhone">
         @for (numelement of arrPhoneType.controls; track $index) {
           <tr>
             <td>
               <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrPhoneType">
                 <mat-label>Tipo de contacto</mat-label>
-                <input matInput type="text" [formControlName]="$index">
+                <mat-select [formControlName]="$index" required>
+                  @for(tipo of tipoContacto(); track tipo) {
+                  <mat-option [value]="tipo.id">{{tipo.description}}</mat-option>
+                  }
+                </mat-select>
                 <mat-error>Dato requerido</mat-error>
               </mat-form-field>
             </td>
@@ -26,7 +30,15 @@
               <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrPhoneNum">
                 <mat-label>Clave lada + Teléfono</mat-label>
                 <input matInput type="text" [formControlName]="$index">
-                <mat-error>Dato requerido</mat-error>
+                <mat-hint>Ej: (777) 1234567</mat-hint>
+                <mat-error>{{getMessageTaxContact(formTaxPayContact.get('arrPhone')?.get('arrPhoneNum')?.errors,'arrPhoneNum')}}</mat-error>
+              </mat-form-field>
+            </td>
+
+            <td>
+              <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrPhoneExt">
+                <mat-label>Extensión</mat-label>
+                <input matInput type="text" [formControlName]="$index">
               </mat-form-field>
             </td>
           </tr>
@@ -69,3 +81,4 @@
     </mat-expansion-panel>
   </mat-accordion>
 </div>
+{{arrPhoneNum.valid}}

@@ -1,4 +1,4 @@
 export interface EntidadesRequestStruct {
-  pkEntidadFederativa: number;
+  pkEntidadFederativa: number|null;
   pkMunicipio?: number;
 }

@@ -53,7 +53,7 @@ export class GeneralService {
   getEntidadesFederativas(idEntidad?:number): Observable<MunicipiosResponseStruct|null> {
     let headers = new HttpHeaders();
     let body: EntidadesRequestStruct = {} as EntidadesRequestStruct;//(idEntidad)?JSON.stringify({"pkEntidadFederativa": idEntidad}):JSON.stringify({});
-    body.pkEntidadFederativa = (idEntidad)?idEntidad:0;
+    body.pkEntidadFederativa = idEntidad??null;
     headers = headers.set("Content-Type", "application/json")
       .set("Authorization", "Basic " + btoa(`${this.userServHacienda}:${this.passServHacienda}`));
 

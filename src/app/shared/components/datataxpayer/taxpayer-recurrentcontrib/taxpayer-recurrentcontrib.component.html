@@ -5,10 +5,10 @@
       Licencia de Conducir <mat-checkbox formControlName="licencia" />
     </div>
     <div class="">
-      Refrendo <mat-checkbox formControlName="refrendo" style="padding-left: 5.5em;" />
+      Refrendo <mat-checkbox formControlName="refrendo" style="padding-left: 5.5em;" (change)="checherRefrendo($event.checked)" />
       <mat-form-field fxFlex class="" style="margin-left: 1em; margin-right:0.5em;" appearance="outline">
         <mat-label>No de Serie</mat-label>
-        <input matInput formControlName="numeroserie" type="number">
+        <input matInput formControlName="numeroserie" type="text" >
         <mat-error>Código postal incorrecto</mat-error>
       </mat-form-field>
       <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">

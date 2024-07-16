@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -25,8 +25,8 @@ export class TaxpayerRecurrentcontribComponent {
     smyt: this.fb.group({
       refrendo: false,
       licencia: false,
-      numeroserie: [{value:'',disable:true},[Validators.required]],
-      confirmserie: [{value:'',disable:true},[Validators.required]]
+      numeroserie: [{value:'',disabled:true},[Validators.required]],
+      confirmserie: [{value:'',disabled:true},[Validators.required]]
     }),
     impuestos: this.fb.group({
       erogaciones:false,
@@ -36,5 +36,21 @@ export class TaxpayerRecurrentcontribComponent {
       isan:false
     })
   });
+
+  get refrendo() {
+    return this.formTaxPayRecurrent.get('smyt')?.get('refrendo') as FormArray;
+  }
+
+  checherRefrendo(event:boolean){
+    console.log(this.formTaxPayRecurrent)
+    if(event) {
+      this.formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.enable();
+      this.formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.enable();
+      return;
+    }
+    this.formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.disable();
+    this.formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.disable();
+    return;
+  }
 
 }

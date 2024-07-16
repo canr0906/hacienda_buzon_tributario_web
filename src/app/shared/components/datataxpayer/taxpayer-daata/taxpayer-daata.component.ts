@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -18,6 +18,9 @@ import { listaMunicipiosStruct } from '@shared/interfaces/municipios-response-st
 import { MatInputModule } from '@angular/material/input';
 
 import {GenerateMessage} from '@shared/classes/generate-message.class'
+import { DataDecrypt } from '@shared/classes/data-decrypt';
+import { UserStruct } from '@auth/interfaces/user-struct.interface';
+import { catchError } from 'rxjs';
 
 @Component({
   selector: 'hacienda-taxpayer-daata',
@@ -49,6 +52,8 @@ export class TaxpayerDaataComponent implements OnInit {
   public arrMunicipios: listaMunicipiosStruct[] = [];
   public arrEstados: listaMunicipiosStruct[] = [];
 
+  public sessionStor!:UserStruct;
+
   private fb = inject(FormBuilder);
   public formTaxPay: FormGroup = this.fb.group({
     tipoPersona: ['F',[Validators.required]],
@@ -56,7 +61,7 @@ export class TaxpayerDaataComponent implements OnInit {
     primerApellido: ['', [Validators.required]],
     segundoApellido: ['', [Validators.required]],
     razonSocial: [{value: '', disabled: true},[Validators.required]],
-    rfc: ['XAXX010101000', [Validators.required]],//, Validators.pattern(this.validatosService.rfcFisica)]],
+    rfc: ['XAXX010101000', [Validators.required, Validators.pattern(this.generalService.rfcFisica)]],
     curp: [''],
     domicilio: this.fb.group({
       calle: ['', [Validators.required]],
@@ -64,7 +69,7 @@ export class TaxpayerDaataComponent implements OnInit {
       numeroInterior: [],
       colonia: ['', [Validators.required]],
       codigoPostal: ['', [Validators.required]],//, Validators.pattern(this.validatosService.exprCp)]],
-      estados: [{value: '17', disabled: false},[Validators.required, Validators.min(1)]],
+      estados: [{value: '', disabled: false},[Validators.required, Validators.min(1)]],
       municipio: ['',[Validators.required, Validators.min(1)]],
       observaciones: []
     })
@@ -77,18 +82,17 @@ export class TaxpayerDaataComponent implements OnInit {
   }*/
   );
 
+  @HostListener('input', ['$event']) onKeyUp(event:any) {
+    event.target['value'] = event.target['value'].toUpperCase();
+  }
+
   ngOnInit(): void {
     /* OBTIENE LISTA DE ENTIDADES FEDERATIVAS */
       this.generalService.getEntidadesFederativas().subscribe(resp => {
         if(!resp){
-          this.openSnackBar('Problema con el API-SERVER, favor de contactar a Servicio Técnico ');
+          this.openSnackBar('Problema con el API-SERVER, favor de contactar al CAT');
         } else {
           this.arrEstados = resp?.data;
-          this.formTaxPay.get('domicilio')?.get('estados')?.setValue(17);
-          if(localStorage.getItem('gestora') !== '64') {
-            this.formTaxPay.get('domicilio')?.get('estados')?.enable();
-          }
-          this.changeEstado('17');
         }
       });
   }
