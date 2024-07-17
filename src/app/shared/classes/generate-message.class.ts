@@ -3,13 +3,14 @@ import MessagesList from '@shared/data/messages.json';
 import {MessageStruct} from '@shared/interfaces/message-struct.interfaz';
 import { FormGroup } from '@angular/forms';
 import { GeneralService } from '@shared/services/general.service';
+import { ValidatorsService } from '@shared/services/validators.service';
 
 export class GenerateMessage {
 
   public mssgArr: MessageStruct[] = MessagesList.taxpayer//ListMessageSmyt.smyt;
   //private generalService = inject(GeneralService);
 
-  constructor(private generalService: GeneralService){}
+  constructor(private generalService: ValidatorsService){}
 
   getMessage(formGroup: FormGroup, idMssg:number, nameField:string) {
 

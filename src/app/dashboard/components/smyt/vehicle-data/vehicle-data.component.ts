@@ -12,12 +12,12 @@ import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import moment from 'moment';
 import 'moment/locale/es';
 import { SmytService } from '@dashboard/services/smyt/smyt.service';
-import { ValidatorService } from '@dashboard/services/validator.service';
 import { VehicleTypeDataStruct } from '@dashboard/interfaces/smyt/vehicle-type-response-struct.interfacz';
 import { OfficeDataStruct } from '@dashboard/interfaces/smyt/offices-response-struct.interfaz';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
 
 import MessagesLists from '@shared/data/messages.json'
+import { ValidatorsService } from '@shared/services/validators.service';
 
 
 @Component({
@@ -46,7 +46,7 @@ export class VehicleDataComponent implements OnInit {
 
   public formBlock = signal<boolean>(true);
 
-  private validatorsService = inject(ValidatorService);
+  private validatorsService = inject(ValidatorsService);
 
   public tipoVehiculoArr = signal<VehicleTypeDataStruct[]>([]);
 

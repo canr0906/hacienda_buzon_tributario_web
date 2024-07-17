@@ -5,6 +5,10 @@
       "msg": "Nombre no coincide con la informacion de SMyT"
     },
     {
+      "id": 2,
+      "msg": "La contraseña no coicide"
+    },
+    {
       "id":100,
       "msg": "Campo Requerido"
     },

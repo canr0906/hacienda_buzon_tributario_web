@@ -9,12 +9,12 @@
       <mat-form-field fxFlex class="" style="margin-left: 1em; margin-right:0.5em;" appearance="outline">
         <mat-label>No de Serie</mat-label>
         <input matInput formControlName="numeroserie" type="text" >
-        <mat-error>Código postal incorrecto</mat-error>
+        <mat-error>{{ getMessageRecurrent(formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.getError('error'),'numeroserie','smyt') }}</mat-error>
       </mat-form-field>
       <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
         <mat-label>Confirmar No de Serie</mat-label>
-        <input matInput formControlName="confirmserie" type="number">
-        <mat-error>Código postal incorrecto</mat-error>
+        <input matInput onpaste="return false" formControlName="confirmserie" type="text">
+        <mat-error>{{ getMessageRecurrent(formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.getError('error'),'confirmserie','smyt') }}</mat-error>
       </mat-form-field>
     </div>
   </div>
@@ -29,3 +29,4 @@
     </div>
   </div>
 </div>
+{{formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.errors}}

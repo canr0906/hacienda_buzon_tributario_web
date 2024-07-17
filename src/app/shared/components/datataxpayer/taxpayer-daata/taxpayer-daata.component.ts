@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSelectModule} from '@angular/material/select';
 
-import { Router, RouterModule  } from '@angular/router';
+import { RouterModule  } from '@angular/router';
 
 
 import { GeneralService } from '@shared/services/general.service';
@@ -18,9 +18,8 @@ import { listaMunicipiosStruct } from '@shared/interfaces/municipios-response-st
 import { MatInputModule } from '@angular/material/input';
 
 import {GenerateMessage} from '@shared/classes/generate-message.class'
-import { DataDecrypt } from '@shared/classes/data-decrypt';
 import { UserStruct } from '@auth/interfaces/user-struct.interface';
-import { catchError } from 'rxjs';
+import { ValidatorsService } from '@shared/services/validators.service';
 
 @Component({
   selector: 'hacienda-taxpayer-daata',
@@ -46,6 +45,7 @@ export class TaxpayerDaataComponent implements OnInit {
   public tipoPersona = signal<string>('F');
 
   private generalService = inject(GeneralService);
+  private validatorService = inject(ValidatorsService);
 
   private _snackBar = inject(MatSnackBar);
 
@@ -61,7 +61,7 @@ export class TaxpayerDaataComponent implements OnInit {
     primerApellido: ['', [Validators.required]],
     segundoApellido: ['', [Validators.required]],
     razonSocial: [{value: '', disabled: true},[Validators.required]],
-    rfc: ['XAXX010101000', [Validators.required, Validators.pattern(this.generalService.rfcFisica)]],
+    rfc: ['XAXX010101000', [Validators.required, Validators.pattern(this.validatorService.rfcFisica)]],
     curp: [''],
     domicilio: this.fb.group({
       calle: ['', [Validators.required]],
@@ -104,7 +104,7 @@ export class TaxpayerDaataComponent implements OnInit {
       this.disabledEnabledElement(['nombre','primerApellido','segundoApellido','curp'],['razonSocial']);
       this.formTaxPay.get('rfc')?.setValue('');
       this.formTaxPay.get('rfc')?.clearValidators();
-      this.formTaxPay.get('rfc')?.setValidators([]);//Validators.pattern(this.validatosService.rfcMoral)]);
+      this.formTaxPay.get('rfc')?.setValidators([Validators.pattern(this.validatorService.rfcMoral)]);
       this.formTaxPay.updateValueAndValidity();
       return;
     }
@@ -112,7 +112,7 @@ export class TaxpayerDaataComponent implements OnInit {
     this.formTaxPay.get('razonSocial')?.enable();
     this.formTaxPay.get('rfc')?.clearValidators();
     this.formTaxPay.get('rfc')?.setValue('XAXX010101000');
-    this.formTaxPay.get('rfc')?.setValidators([]);//Validators.pattern(this.validatosService.rfcFisica)]);
+    this.formTaxPay.get('rfc')?.setValidators([Validators.pattern(this.validatorService.rfcFisica)]);
     this.formTaxPay.updateValueAndValidity();
     return;
   }
@@ -141,7 +141,7 @@ export class TaxpayerDaataComponent implements OnInit {
   }
 
   getMessage(idMssg:number, nameField:string) {
-      let generateMessage = new GenerateMessage(this.generalService);
+      let generateMessage = new GenerateMessage(this.validatorService);
       return generateMessage.getMessage(this.formTaxPay,idMssg, nameField);
   }
 

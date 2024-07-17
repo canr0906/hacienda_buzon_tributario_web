@@ -4,7 +4,7 @@
       <mat-expansion-panel-header >
         <mat-panel-title>Teléfonos</mat-panel-title>
       </mat-expansion-panel-header>
-      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewPhone()" [disabled]="arrPhoneNum.length>=3 || !arrPhoneNum.valid">
+      <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewPhone()" [disabled]="arrPhoneNum.length>=3 || !formTaxPayContact.get('arrPhone')?.valid">
         <mat-icon>add_circle </mat-icon>
       </button>
       <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="removeArrPhone()" [disabled]="arrPhoneNum.length==1">
@@ -22,7 +22,7 @@
                   <mat-option [value]="tipo.id">{{tipo.description}}</mat-option>
                   }
                 </mat-select>
-                <mat-error>Dato requerido</mat-error>
+                <mat-error>{{getMessageTaxContact(formTaxPayContact.get('arrPhone')?.get('arrPhoneType')?.errors,'arrPhoneType')}}</mat-error>
               </mat-form-field>
             </td>
 
@@ -50,21 +50,25 @@
       <mat-expansion-panel-header >
         <mat-panel-title>Correo Electrónico</mat-panel-title>
       </mat-expansion-panel-header>
-      <button mat-mini-fab type="button" (click)="addNewEmail()" [disabled]="arrEmailDir.length>=3">
+      <button mat-mini-fab type="button" (click)="addNewEmail()" [disabled]="arrEmailDir.length>=3 || !formTaxPayContact.get('arrEmail')?.valid">
         <mat-icon>add_circle </mat-icon>
       </button>
       <button mat-mini-fab type="button" (click)="removeArrEmail()" [disabled]="arrEmailDir.length==1">
         <mat-icon>do_not_disturb_on </mat-icon>
       </button>
-      <br>
+      <br><br>
       <table formGroupName="arrEmail">
         @for (numelement of arrEmailType.controls; track $index) {
           <tr>
             <td>
               <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrEmailType">
                 <mat-label>Tipo de contacto</mat-label>
-                <input matInput type="text" [formControlName]="$index">
-                <mat-error>Dato requerido</mat-error>
+                <mat-select [formControlName]="$index" required>
+                  @for(tipo of tipoContacto(); track tipo) {
+                  <mat-option [value]="tipo.id">{{tipo.description}}</mat-option>
+                  }
+                </mat-select>
+                <mat-error>{{getMessageTaxContact(formTaxPayContact.get('arrEmail')?.get('arrEmailType')?.errors,'arrEmailType')}}</mat-error>
               </mat-form-field>
             </td>
 
@@ -72,7 +76,7 @@
               <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="arrEmailDir">
                 <mat-label>Correo</mat-label>
                 <input matInput type="text" [formControlName]="$index">
-                <mat-error>Dato requerido</mat-error>
+                <mat-error>{{getMessageTaxContact(formTaxPayContact.get('arrEmail')?.get('arrEmailDir')?.errors,'arrEmailDir')}}</mat-error>
               </mat-form-field>
             </td>
           </tr>
@@ -81,4 +85,3 @@
     </mat-expansion-panel>
   </mat-accordion>
 </div>
-{{arrPhoneNum.valid}}

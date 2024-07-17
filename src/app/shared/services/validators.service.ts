@@ -5,7 +5,7 @@ import moment from 'moment';
 @Injectable({
   providedIn: 'root'
 })
-export class ValidatorServiceBorrar {
+export class ValidatorsService {
 
   public firstNameAndLastnamePattern: string = '([a-zA-Z]+) ([a-zA-Z]+)';
   public emailPattern: string = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$";
@@ -16,8 +16,12 @@ export class ValidatorServiceBorrar {
   public peoplesNamePath: string = '^(?![0-9]*$)[a-zA-ZÑÁÉÍÓÚ.]+([\ a-zA-ZÑÁÉÍÓÚ.]+)*$';
   public streetNamePath: string = '^(?![*_:]*$)[a-zA-ZÑÁÉÍÓÚ.#0-9\ ]+$';
   public alfaPath: string = '^[a-zA-ZÑ0-9]+$';
+  public expSerieVehiculo: string = '^[a-zA-ZÑ0-9]{17}$';
   public datePath: string = '^([0-9]{2,})([/])([0-9]{2,})([/])([0-9]{4,})$';//'^([0-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(\d{4})$';
-  public rfcPath = '^[a-zA-Z&Ñ]{3,4}[0-9]{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])[a-zA-Z0-9]{2}[0-9A]$';
+  public rfcFisica = '^([a-zA-Z&Ñ]{4}([0-9]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01]))([a-zA-Z0-9]{2}[0-9A])?$';
+  public rfcMoral  = '^([a-zA-Z&Ñ]{3}([0-9]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01]))([a-zA-Z0-9]{2}[0-9A])$';
+
+  public expValidPass = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,15}[^\'\s]$';//'^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,15}$'
 
   constructor() { }
 
@@ -39,12 +43,13 @@ export class ValidatorServiceBorrar {
 
   isFieldOneEqualFielTwo( field1: string, field2: string, mssg: number) {
     return ( formGroup: AbstractControl ): ValidationErrors | null => {
-
-      if(formGroup.get(field1)?.status == 'DISABLED' || formGroup.get(field2)?.status == 'DISABLED')
+      console.log(formGroup.get(field1)?.status)
+      console.log(formGroup.get(field2)?.status)
+      if(formGroup.get(field1)?.status !== 'VALID' || formGroup.get(field2)?.status !== 'VALID')
         return null;
       const fielValue1 = formGroup.get(field1)?.value;
       const fielValue2 = formGroup.get(field2)?.value;
-
+      console.log(fielValue1 + "!==" + fielValue2)
       if ( fielValue1 !== fielValue2) {
         formGroup.get(field2)?.setErrors( { notEqual: true, error:mssg } );
         return { notEqual: true, error:mssg };

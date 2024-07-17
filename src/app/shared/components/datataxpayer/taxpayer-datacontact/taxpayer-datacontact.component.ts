@@ -12,6 +12,7 @@ import { GeneralService } from '@shared/services/general.service';
 
 import TipoContacto from '@shared/data/tipo_contacto.json';
 import { MatSelectModule } from '@angular/material/select';
+import { ValidatorsService } from '@shared/services/validators.service';
 
 @Component({
   selector: 'hacienda-taxpayer-datacontact',
@@ -32,7 +33,7 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class TaxpayerDatacontactComponent implements OnInit {
 
-  private generalService = inject(GeneralService);
+  private validatorService = inject(ValidatorsService)
 
   public stepContact = signal(0);
 
@@ -42,10 +43,10 @@ export class TaxpayerDatacontactComponent implements OnInit {
   public formTaxPayContact: FormGroup = this.fb.group({
     arrPhone: this.fb.group({
       arrPhoneType: this.fb.array([
-        [1, [Validators.required, Validators.min(1)]]
+        ['', [Validators.required, Validators.min(1)]]
       ]),
       arrPhoneNum: this.fb.array([
-        ['', [Validators.required, Validators.pattern(this.generalService.expNoTel)]] /* validar numero telefonico */
+        ['', [Validators.required, Validators.pattern(this.validatorService.expNoTel)]]
       ]),
       arrPhoneExt: this.fb.array([
         ['']
@@ -53,10 +54,10 @@ export class TaxpayerDatacontactComponent implements OnInit {
     }),
     arrEmail: this.fb.group({
       arrEmailType: this.fb.array([
-        ['',Validators.required]
+        ['',[Validators.required, Validators.min(1)]]
       ]),
       arrEmailDir: this.fb.array([
-        ['',Validators.required]
+        ['',[Validators.required, Validators.pattern(this.validatorService.emailPattern)]]
       ])
     })
   });
@@ -80,9 +81,7 @@ export class TaxpayerDatacontactComponent implements OnInit {
     return this.formTaxPayContact.get('arrEmail')?.get('arrEmailType') as FormArray;
   }
 
-  ngOnInit(): void {
-    this.generalService
-  }
+  ngOnInit(): void {}
 
   /* METODO ENCARGADO DE AGREGAR UN NUEVO REGISTRO AL FORMULARIO, RELACIONADO A DATOS TELEFONICOS */
   addNewPhone() {
@@ -90,7 +89,7 @@ export class TaxpayerDatacontactComponent implements OnInit {
        new FormControl('', [Validators.required,Validators.min(1)])
     );
     this.arrPhoneNum.push(
-       new FormControl('', [Validators.required, Validators.pattern(this.generalService.expNoTel)])
+       new FormControl('', [Validators.required, Validators.pattern(this.validatorService.expNoTel)])
     );
     this.arrPhoneExt.push(
       new FormControl('')
@@ -106,10 +105,10 @@ export class TaxpayerDatacontactComponent implements OnInit {
   /* METODO ENCARGADO DE AGREGAR UN NUEVO REGISTRO AL FORMULARIO, RELACIONADO A DATOS DE EMAIL */
   addNewEmail() {
     this.arrEmailType.push(
-       new FormControl('', [Validators.required])
+       new FormControl('', [Validators.required,Validators.min(1)])
     );
     this.arrEmailDir.push(
-       new FormControl('', [Validators.required])
+       new FormControl('', [Validators.required, Validators.pattern(this.validatorService.emailPattern)])
     );
 
   }
@@ -138,22 +137,63 @@ export class TaxpayerDatacontactComponent implements OnInit {
         //messge = '';
       })
     }
-    /*if (!idMssg) {
-      return '';
+
+    if(nameField=='arrPhoneType') {
+      let arrRep: number[] = []
+      this.arrPhoneType.controls.forEach((val,key)=>{
+        if(!!val.errors) {
+          if(!!val.errors['required']) {
+            messge = 'Este campo requerido';
+          }else if(!!val.errors['invalid']){
+            messge = val.errors['error'];
+          }else{
+            messge = 'Formato incorrecto';
+          }
+        } else {
+          if(!!!arrRep.filter(res => res == val.value).length) {
+            arrRep.push(val.value)
+          } else {
+            messge = 'No se puede establecer mas de un No Telefónico con el el mismo tipo.';
+            val.setErrors({ invalid: true, error: messge });
+          }
+        }
+      })
     }
-    const errors = Object.keys(idMssg);
-    if (errors.includes('required')) {
-      return 'Este campo requerido';
+
+    if(nameField=='arrEmailDir') {
+      this.arrEmailDir.controls.forEach((val,key)=>{
+        if(!!val.errors) {
+          if(!!val.errors['required']) {
+            messge = 'Este campo requerido';
+          }else{
+            messge = 'Formato incorrecto';
+          }
+        }
+        //messge = '';
+      })
     }
-    if (errors.includes('min')) {
-      return 'No se permite valor menor a 1';
+
+    if(nameField=='arrEmailType') {
+      let arrRep: number[] = []
+      this.arrEmailType.controls.forEach((val,key)=>{
+        if(!!val.errors) {
+          if(!!val.errors['required']) {
+            messge = 'Este campo requerido';
+          }else if(!!val.errors['invalid']){
+            messge = val.errors['error'];
+          }else{
+            messge = 'Formato incorrecto';
+          }
+        } else {
+          if(!!!arrRep.filter(res => res == val.value).length) {
+            arrRep.push(val.value)
+          } else {
+            messge = 'No se puede establecer mas de un Email con el el mismo tipo.';
+            val.setErrors({ invalid: true, error: messge });
+          }
+        }
+      })
     }
-    if (errors.includes('max')) {
-      return 'Para poder continuar seleccione NO';
-    }
-    if (errors.includes('pattern')) {
-      return 'Formato incorrecto';
-    }*/
     return messge;
   }
 }

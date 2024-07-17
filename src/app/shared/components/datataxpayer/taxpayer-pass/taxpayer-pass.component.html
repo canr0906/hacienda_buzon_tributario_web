@@ -1,15 +1,16 @@
 <div class="" [formGroup]="formTaxPayPass" #chiltTaxPayPass>
   <div class="example-form-fields">
     <mat-form-field fxFlex class="flex justify-content-center" appearance="outline">
-      <mat-label>CONTRASEÑA</mat-label>
+      <mat-label>Contraseña</mat-label>
       <input matInput formControlName="password" type="password" placeholder="Contraseña" />
-      <mat-error>Campo requerido</mat-error>
+      <mat-hint>Entre 8 y 15 caracteres alfanumericos</mat-hint>
+      <mat-error>{{ getMessagePass(formTaxPayPass.get('password')?.getError('error'),'password') }}</mat-error>
     </mat-form-field>
 
     <mat-form-field  fxFlex class="flex justify-content-center" style="padding-left: 0.5em;" appearance="outline">
-      <mat-label>CONTRASEÑA</mat-label>
-      <input matInput formControlName="confpass" type="password" placeholder="Contraseña" />
-      <mat-error>Campo requerido</mat-error>
+      <mat-label>Confirmar Contraseña</mat-label>
+      <input matInput formControlName="confpass" onpaste="return false" type="password" placeholder="Contraseña" />
+      <mat-error>{{ getMessagePass(formTaxPayPass.get('confpass')?.getError('error'),'confpass') }}</mat-error>
     </mat-form-field>
   </div>
 </div>
