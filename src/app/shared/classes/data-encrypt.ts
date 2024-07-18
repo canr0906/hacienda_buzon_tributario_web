@@ -12,7 +12,7 @@ export class DataEncrypt {
   async dataEncript(nameLocal:string):Promise<boolean|null> {
     try {
       const dataencrypt = CryptoJS.AES.encrypt(JSON.stringify(this.dataStruct), this.secretKey).toString();
-      sessionStorage.setItem(nameLocal,dataencrypt);
+      localStorage.setItem(nameLocal,dataencrypt);
       return true;
     } catch(error) {
       throw new Error('No fue posible almacenar la información de manera local, favor de contactar al CAT e intentarlo nuevmanete ');

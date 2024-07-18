@@ -69,7 +69,7 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
 
   /* MANEJO DE LA ESTRUCTURA DE RESPONSE DE USUARIO LOGEADO */
-  private roles: UserStruct = JSON.parse(localStorage.getItem('hbtw_user')!);
+  //private roles: UserStruct = JSON.parse(localStorage.getItem('hbtw_user')!);
 
   ngOnInit(): void {
     /* AL DIR CLICK EN EL ICONO MENU DEL TOOLBAR SE DISPARA ESTA ACCION */

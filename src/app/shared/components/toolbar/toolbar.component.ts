@@ -50,7 +50,7 @@ export class ToolbarComponent implements OnInit {
   public existSessioStore = signal<boolean>(false);
 
   ngOnInit(): void {
-    if(sessionStorage.getItem('hbtw_token')) {
+    if(localStorage.getItem('hbtw_token')) {
       this.existSessioStore.set(true)
     }
   }

@@ -76,8 +76,6 @@ export class LoginComponent {
       .subscribe({
         next: (resp) => {
           this.isLoading.set(false);
-          console.log( sessionStorage.getItem('hbtw_token') )
-          console.log(resp.success)
           if(resp.success) {
             this.router.navigateByUrl('dashboard/sevices-menu');
             return;
@@ -88,10 +86,7 @@ export class LoginComponent {
           this.isLoading.set(false);
           Swal.fire('Error', message, 'error');
         },
-        complete: () => {
-          console.log(sessionStorage.getItem('hbtw_token'))
-          console.log("TERMINO LA EJECUSION")
-        }
+        complete: () => {}
       });
   }
 

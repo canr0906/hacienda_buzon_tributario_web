@@ -50,6 +50,9 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
 
   ngOnInit(): void {
     this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
+    if(!!localStorage.getItem('hbtw_token')) {
+
+    }
   }
   ngAfterContentInit(): void {
     setTimeout(() => {

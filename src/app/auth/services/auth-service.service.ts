@@ -41,7 +41,7 @@ export class AuthServiceService {
     this._currentUser.set(user);
     this._authStatus.set(AuthStatusStruct.authenticated);
 
-    if(!sessionStorage.getItem('hbtw_user')) {
+    if(!localStorage.getItem('hbtw_user')) {
       let encript = new DataEncrypt(user);
       encript.dataEncript('hbtw_user');
     }
@@ -51,9 +51,8 @@ export class AuthServiceService {
 
   checkAuthStatus(): Observable<boolean> {
     const url = `${this.baseUrlApi}/auth/check-token`;
-    const token = localStorage.getItem('user');//sessionStorage.getItem('token');
 
-    if(!token) {
+    if(!!localStorage.getItem('token')) {
       this.logout();
       return of(false);
     }
@@ -77,9 +76,9 @@ export class AuthServiceService {
           if(Object.keys(data.user).length>0) {
             generalResponse.mensaje = 'ok';
             generalResponse.success= true;
-            /* ENVIA DATOS DEL USUARIO PARA ALMACENARLOS EN SESSIONSTORAGE Y MANEJAR STATUS DE LOGION O NO EN LA APP */
+            /* ENVIA DATOS DEL USUARIO PARA ALMACENARLOS EN LOCALTORAGE Y MANEJAR STATUS DE LOGION O NO EN LA APP */
             this.setAuthentication(data.user);
-            /* SE ENVIA EL TOKEN PAR SER ALMACENADO EN SESSIONSTORAGE */
+            /* SE ENVIA EL TOKEN PAR SER ALMACENADO EN LOCALTORAGE */
             new DataEncrypt(data.token).dataEncript('hbtw_token');
           }
           return generalResponse;
@@ -132,7 +131,7 @@ export class AuthServiceService {
   }
 
   logout(): void {
-    sessionStorage.clear();
+    localStorage.clear();
     this._currentUser.set(null);
     this._authStatus.set( AuthStatusStruct.notAuthenticated );
   }
