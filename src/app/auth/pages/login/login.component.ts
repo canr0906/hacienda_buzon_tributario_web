@@ -60,10 +60,6 @@ export class LoginComponent {
     }
   );
 
-  @HostListener('input', ['$event']) onKeyUp(event: any) {
-    event.target['value'] = event.target['value'].toUpperCase();
-  }
-
   login(): void {
     if (this.myForm.invalid) {
       this.myForm.markAllAsTouched();

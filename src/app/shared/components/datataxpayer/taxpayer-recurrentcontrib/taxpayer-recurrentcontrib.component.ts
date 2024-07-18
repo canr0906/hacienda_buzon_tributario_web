@@ -8,6 +8,7 @@ import { ValidatorsService } from '@shared/services/validators.service';
 
 import MessagesList from '@shared/data/messages.json';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'hacienda-taxpayer-recurrentcontrib',
@@ -56,8 +57,14 @@ export class TaxpayerRecurrentcontribComponent {
   }
 
   checherRefrendo(event:boolean){
-    console.log(this.formTaxPayRecurrent)
+
     if(event) {
+      Swal.fire({
+        title:"<strong>Refrendo</strong>",
+        html: `
+          Si deseas agragar mas vehículos, una vez generado el registro dirígete al menú de <b>configuracion -> impuestos -> refrendo</b> y agreaga los vehiculos
+        `,
+      });
       this.formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.enable();
       this.formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.enable();
       return;
@@ -70,8 +77,8 @@ export class TaxpayerRecurrentcontribComponent {
   getMessageRecurrent(idMssg:number, nameField:string,subname:string) {
     let touched = this.formTaxPayRecurrent.get(subname)?.get(nameField)?.touched;
     let nameFileValue = this.formTaxPayRecurrent.get(subname)?.get(nameField)?.value;
-     let pathSelect = this.validatorService.expSerieVehiculo
-     console.log(this.formTaxPayRecurrent.get(subname)?.get(nameField)?.errors)
+    let pathSelect = this.validatorService.expSerieVehiculo
+
     if(idMssg !== null && idMssg !== undefined) {
       const message = this.listMessage().filter(({id}) => id == idMssg );
       return message[0].msg;

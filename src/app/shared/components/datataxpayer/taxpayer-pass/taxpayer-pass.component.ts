@@ -40,22 +40,28 @@ export class TaxpayerPassComponent implements AfterViewInit {
   );
 
   ngAfterViewInit(): void {
-    Swal.fire('PASSWORD', "De 8 - 15 caracteres Al menos una mayuscula, almenos una minuscula, almenos un caracter @$&", 'info');
+    Swal.fire({
+      title:"<strong>Requisitos para el PASSWORD</strong>",
+      html: `
+        De <b>8-15</b> caracteres. Al menos una mayúscula. Al menos una minúscula. Al menos un caracter <b>$,@,%,&</b>
+      `,
+    });
   }
 
   getMessagePass(idMssg:number, nameField:string) {
     let touched = this.formTaxPayPass.get(nameField)?.touched;
     let nameFileValue = this.formTaxPayPass.get(nameField)?.value;
-     let pathSelect = this.validatorService.expValidPass
-     console.log(this.formTaxPayPass.get(nameField)?.errors)
+    let pathSelect = this.validatorService.expValidPass
+
     if(idMssg !== null && idMssg !== undefined) {
       const message = this.listMessage().filter(({id}) => id == idMssg );
       return message[0].msg;
     }
+
     if( touched ) {
       let idMessage=101;
       let pattern = new RegExp(pathSelect);
-      console.log(pattern.test(nameFileValue))
+
       if(!pattern.test(nameFileValue) || nameFileValue == null) {
         const message = this.listMessage().filter(({id}) => id == idMessage );
         this.formTaxPayPass.get(nameField)?.setErrors( { notEqual: true, error:idMessage } );

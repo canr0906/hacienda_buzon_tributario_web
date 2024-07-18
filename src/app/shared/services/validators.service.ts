@@ -28,7 +28,8 @@ export class ValidatorsService {
     (?!.* ) No contener espacios
     .{6,15} Minimo 6 maximo 15
   */
-  public expValidPass = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[@$&])(?!.* ).{6,15}$';//'^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,15}$'
+  public expValidPass = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[@$&%])(?!.* )[a-zA-Z0-9@$&%]{8,15}$';
+  //'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[@$&])(?!.* ).{6,15}$';//'^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,15}$'
 
   constructor() { }
 
@@ -50,13 +51,12 @@ export class ValidatorsService {
 
   isFieldOneEqualFielTwo( field1: string, field2: string, mssg: number) {
     return ( formGroup: AbstractControl ): ValidationErrors | null => {
-      console.log(formGroup.get(field1)?.status)
-      console.log(formGroup.get(field2)?.status)
+
       if(formGroup.get(field1)?.status !== 'VALID' || formGroup.get(field2)?.status !== 'VALID')
         return null;
       const fielValue1 = formGroup.get(field1)?.value;
       const fielValue2 = formGroup.get(field2)?.value;
-      console.log(fielValue1 + "!==" + fielValue2)
+
       if ( fielValue1 !== fielValue2) {
         formGroup.get(field2)?.setErrors( { notEqual: true, error:mssg } );
         return { notEqual: true, error:mssg };

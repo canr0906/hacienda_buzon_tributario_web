@@ -18,11 +18,16 @@ import { PhoneUSerStruct } from '@auth/interfaces/register-user/phone-user-struc
 import { VehicleUSerStruct } from '@auth/interfaces/register-user/vehicle-user-struct.interfaz';
 import { TaxUSerStruct } from '@auth/interfaces/register-user/tax-user-struct.interfaz';
 import { ConcesionUSerStruct } from '@auth/interfaces/register-user/concesion-user-struct.interfaz';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+
+import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [
+    LoadSpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatDividerModule,
@@ -46,6 +51,9 @@ export class RegisterComponent implements AfterViewInit {
   private authService = inject(AuthServiceService);
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
   public isLoading = signal<boolean>(false);
+
+  private router = inject(Router);
+
   /* VARIABLE QUE CONTENDRA LOS DATOS DEL USUARIO */
   private registerUserStruct: RegisterlUser           = {} as RegisterlUser;
   private emailUserStruct: EmailUSerStruct[]          = [];
@@ -112,6 +120,13 @@ export class RegisterComponent implements AfterViewInit {
       this.isLoading.set(false);
       return;
     }
+
+    this.registerUserStruct = {} as RegisterlUser;
+    this.taxUserStruct      = [];
+    this.vehicleUserStruct  = [];
+    this.emailUserStruct    = []
+    this.phoneUserStruct    = [];
+
     /* DATOS GENERALES DEL USUARIO */
     this.registerUserStruct.tipo             = this.myFormReg.get('datos_generales')?.get('tipoPersona')?.value;
     this.registerUserStruct.nombre           = String(this.myFormReg.get('datos_generales')?.get('nombre')?.value).toUpperCase();
@@ -132,7 +147,7 @@ export class RegisterComponent implements AfterViewInit {
     this.registerUserStruct.cp        = this.myFormReg.get('datos_generales')?.get('domicilio')?.get('codigoPostal')?.value;
     this.registerUserStruct.calle     = String(this.myFormReg.get('datos_generales')?.get('domicilio')?.get('calle')?.value).toUpperCase();
     this.registerUserStruct.no_ext    = String(this.myFormReg.get('datos_generales')?.get('domicilio')?.get('numeroExterior')?.value).toUpperCase();
-    this.registerUserStruct.no_int    = String(this.myFormReg.get('datos_generales')?.get('domicilio')?.get('numeroInterior')?.value).toUpperCase();
+    this.registerUserStruct.no_int    = this.myFormReg.get('datos_generales')?.get('domicilio')?.get('numeroInterior')?.value??"";
 
     /* DATOS DE EMAILS DEL USUARIO */
     this.childComponentContact.arrEmailDir.controls.forEach((val,key) =>{
@@ -148,6 +163,7 @@ export class RegisterComponent implements AfterViewInit {
     this.childComponentContact.arrPhoneNum.controls.forEach((val,key) =>{
       this.phoneUserStruct.push(
         {
+          //tipo:1,
           no_telefonico: val.value,
           tipo_contacto: this.childComponentContact.arrPhoneType.controls[key].value,
           extension: this.childComponentContact.arrPhoneExt.controls[key].value,
@@ -156,39 +172,86 @@ export class RegisterComponent implements AfterViewInit {
     });
 
     /* DATOS DE CONTRIBUCIONES DEL USUARIO */
-    if(this.myFormReg.get('datos_contrib')?.get('smyt')?.get('licencia')?.value) {
-      this.taxUserStruct.push({impuesto:1})
-    }
-    if(this.myFormReg.get('datos_contrib')?.get('smyt')?.get('refrendo')?.value){
-      this.taxUserStruct.push({impuesto:2})
-      this.vehicleUserStruct.push({
-        serie: this.myFormReg.get('datos_contrib')?.get('smyt')?.get('numeroserie')?.value
-      })
-    }
+    if(!this.myFormReg.get('datos_contrib')?.pristine) {
+      console.log(this.myFormReg.get('datos_contrib'))
+      let flag   = 0;
+      let flag_v = 0;
+      if(this.myFormReg.get('datos_contrib')?.get('smyt')?.get('licencia')?.value) {
+        this.taxUserStruct.push({impuesto:1})
+        flag=1;
+      }
+      if(this.myFormReg.get('datos_contrib')?.get('smyt')?.get('refrendo')?.value){
+        this.taxUserStruct.push({impuesto:2})
+        flag=1;
+        flag_v=1;
+        this.vehicleUserStruct.push({
+          serie: this.myFormReg.get('datos_contrib')?.get('smyt')?.get('numeroserie')?.value
+        })
+      }
 
-    if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('erogaciones')?.value){
-      this.taxUserStruct.push({impuesto:3})
-    }
-    if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('hospedaje')?.value){
-      this.taxUserStruct.push({impuesto:4})
-    }
-    if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('balnearios')?.value){
-      this.taxUserStruct.push({impuesto:5})
-    }
-    if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('demasias')?.value){
-      this.taxUserStruct.push({impuesto:6})
-    }
-    if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('isan')?.value){
-      this.taxUserStruct.push({impuesto:7})
+      if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('erogaciones')?.value){
+        this.taxUserStruct.push({impuesto:3})
+        flag=1;
+      }
+      if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('hospedaje')?.value){
+        this.taxUserStruct.push({impuesto:4})
+        flag=1;
+      }
+      if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('balnearios')?.value){
+        this.taxUserStruct.push({impuesto:5})
+        flag=1;
+      }
+      if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('demasias')?.value){
+        this.taxUserStruct.push({impuesto:6})
+        flag=1;
+      }
+      if(this.myFormReg.get('datos_contrib')?.get('impuestos')?.get('isan')?.value){
+        this.taxUserStruct.push({impuesto:7})
+        flag=1;
+      }
+      if(flag) {
+        this.registerUserStruct.impuestosList = this.taxUserStruct;
+      }
+      if(flag_v) {
+        this.registerUserStruct.vehiculosList = this.vehicleUserStruct;
+      }
     }
 
     this.registerUserStruct.correosList = this.emailUserStruct;
     this.registerUserStruct.telefonosList = this.phoneUserStruct;
-    this.registerUserStruct.impuestosList = this.taxUserStruct;
-    this.registerUserStruct.vehiculosList = this.vehicleUserStruct;
+
 
     console.log(this.registerUserStruct);
-
-    this.authService.registerTaxPayer()
+    let message: string = '';
+    this.authService.registerTaxPayer(this.registerUserStruct)
+      .subscribe({
+        next: (resp) => {
+          this.isLoading.set(false);
+          if(resp.success) {
+            message = "Registro Exitoso !!!";
+          } else{
+            message = "Problemas en el Registro, contacte al CAT"
+          }
+          Swal.fire(
+            {
+              icon: "success",
+              title: message,
+              showConfirmButton: false,
+              timer: 1500
+            }
+          ).then(()=>{ this.router.navigateByUrl('auth/login'); });
+        },
+        error: (error) => {
+          Swal.fire({
+            title: "Error !!",
+            text: error,
+            icon: "error"
+          }).then((response) => {
+            if (response.isConfirmed) {
+              this.router.navigateByUrl('auth/login');
+            }
+          });
+        }
+      })
   }
 }

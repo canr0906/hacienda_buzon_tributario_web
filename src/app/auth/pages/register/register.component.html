@@ -1,4 +1,6 @@
-<!--<shared-load-spinner *ngIf="isLoading"></shared-load-spinner>-->
+@if (isLoading()) {
+  <load-spinner />
+}
 <div class="grid flex">
   <div ><!--[ngClass]="(sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall')?'col-8':'col-12'" >-->
     <mat-card>

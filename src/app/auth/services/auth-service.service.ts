@@ -9,6 +9,8 @@ import { LoginRequestStruct } from '@auth/interfaces/login-request-struct';
 import { DataEncrypt } from '@shared/classes/data-encrypt';
 import { DataDecrypt } from '@shared/classes/data-decrypt';
 import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
+import { RegisterlUser } from '@auth/interfaces/register-user/register-user-struct.interfaz';
+import { RegisterDataResponse } from '@auth/interfaces/register-data-response.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -101,8 +103,32 @@ export class AuthServiceService {
       );
   }
 
-  registerTaxPayer() {
+  registerTaxPayer(registerUserStruct: RegisterlUser) {
+    const url = `${this.urlApiRestNest}auth/register`;
+    let headers = new HttpHeaders();
 
+    headers = headers.set("Content-Type", "application/json")
+    .set("Authorization", "Basic " + btoa(`${this.userApiRest}:${this.passApiRest}`));
+
+    return this.http.post<RegisterDataResponse>(url,JSON.stringify(registerUserStruct),{headers})
+      .pipe(
+        map(resp => resp),
+        catchError(err => {
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
+            }
+            return message;
+          });
+        })
+      );
   }
 
   logout(): void {
