@@ -20,8 +20,15 @@ export class ValidatorsService {
   public datePath: string = '^([0-9]{2,})([/])([0-9]{2,})([/])([0-9]{4,})$';//'^([0-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(\d{4})$';
   public rfcFisica = '^([a-zA-Z&Ñ]{4}([0-9]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01]))([a-zA-Z0-9]{2}[0-9A])?$';
   public rfcMoral  = '^([a-zA-Z&Ñ]{3}([0-9]{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01]))([a-zA-Z0-9]{2}[0-9A])$';
-
-  public expValidPass = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,15}[^\'\s]$';//'^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,15}$'
+  /*
+    (?=.*?[A-Z]) Al menos una letra MAyuscula
+    (?=.*?[a-z]) Al menos una letra minuscula
+    (?=.*?[0-9]) al menos un digito
+    (?=.*?[#?!@$%^&*-]) Al menos un caracter especial
+    (?!.* ) No contener espacios
+    .{6,15} Minimo 6 maximo 15
+  */
+  public expValidPass = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[@$&])(?!.* ).{6,15}$';//'^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,15}$'
 
   constructor() { }
 

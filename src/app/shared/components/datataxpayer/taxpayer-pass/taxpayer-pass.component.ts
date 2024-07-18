@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import MessagesList from '@shared/data/messages.json';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
 import { ValidatorsService } from '@shared/services/validators.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'hacienda-taxpayer-pass',
@@ -18,7 +19,8 @@ import { ValidatorsService } from '@shared/services/validators.service';
   templateUrl: './taxpayer-pass.component.html',
   styleUrl: './taxpayer-pass.component.css'
 })
-export class TaxpayerPassComponent {
+export class TaxpayerPassComponent implements AfterViewInit {
+
 
   private validatorService = inject(ValidatorsService);
 
@@ -32,10 +34,14 @@ export class TaxpayerPassComponent {
   },
   {
     validators: [
-      //this.validatorService.isFieldOneEqualFielTwo('password', 'confpass',4)
+      this.validatorService.isFieldOneEqualFielTwo('password', 'confpass',2)
     ]
   }
   );
+
+  ngAfterViewInit(): void {
+    Swal.fire('PASSWORD', "De 8 - 15 caracteres Al menos una mayuscula, almenos una minuscula, almenos un caracter @$&", 'info');
+  }
 
   getMessagePass(idMssg:number, nameField:string) {
     let touched = this.formTaxPayPass.get(nameField)?.touched;
@@ -46,9 +52,6 @@ export class TaxpayerPassComponent {
       const message = this.listMessage().filter(({id}) => id == idMssg );
       return message[0].msg;
     }
-
-    let pattern = new RegExp('^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[$@$!%*?&])(?=.*[0-9]).{6,15}$');
-      console.log("PAtron::"+ pattern.test('TYUIO&4d'))
     if( touched ) {
       let idMessage=101;
       let pattern = new RegExp(pathSelect);
