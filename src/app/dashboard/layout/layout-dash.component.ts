@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import {SidenavComponent} from '@shared/components/sidenav/sidenav.component';
 import {ToolbarComponent} from '@shared/components/toolbar/toolbar.component';
@@ -33,6 +33,7 @@ export class LayoutDashComponent implements OnDestroy {
   public sendActionSidenav: Subject<boolean> = new Subject<boolean>();
 
   private _snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   /* RECIBE EL NOMBRE DEL CONCEPTO DEL SIDENAV PARA SU MANIPULACION */
   public receiveNameConcept = signal<string>('');
@@ -97,6 +98,9 @@ export class LayoutDashComponent implements OnDestroy {
     this.receiveNameConcept.set('');
     //this.sendActEraseLocalStor = true;
     this.sendActEraseLocalStor.next(true);
+
+    localStorage.removeItem('hbtw_general');
+    this.router.navigate(['/dashboard/portal-hacienda-servicios']);//['/pagos']);
   }
 
   /* RECIBE VALORES DEL COMPONENTE HIJO TOOLBAR AL PRECIONAR MENU*/

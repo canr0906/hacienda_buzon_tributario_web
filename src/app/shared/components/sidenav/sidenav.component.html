@@ -28,6 +28,14 @@
           }
         </li>
       </div>
+      @if(showMessage()) {
+      <mat-card class="">
+        <mat-card-content>
+          <div [ngClass]="{ 'alert': 'Prueba', 'alert-danger': 'error' }">Seleccione alguna de las dependencia para
+            mostrar las opciones </div>
+        </mat-card-content>
+      </mat-card>
+      }
       } @placeholder { <load-spinner/> }
       } @empty {
       <mat-card-content>

@@ -10,15 +10,17 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {MatCardModule} from '@angular/material/card';
 import { DataConceptsStruct } from '@shared/interfaces/concepts-response-struct.interface';
-import { UserStruct } from '@auth/interfaces/user-struct.interface';
 import { Subject } from 'rxjs';
 import { ServiciosHaciendaPortalService } from '@dashboard/services/servicios-hacienda-portal.service';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
+import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
+import { VehicleDataResponseStruct } from '@dashboard/interfaces/smyt/vehicle-data-response-struct';
+import { VehicleDataRequestStruct } from '@dashboard/interfaces/smyt/vehicle-data-request-struct';
+import { PolizaDataResponse } from '@dashboard/interfaces/smyt/poliza-data-response.interfaz';
+import { DataDecrypt } from '@shared/classes/data-decrypt';
+import { DataEncrypt } from '@shared/classes/data-encrypt';
 
-export interface IdPadre {
-  padreId: number
-}
 
 @Component({
   selector: 'hacienda-sidenav',
@@ -38,6 +40,8 @@ export interface IdPadre {
 })
 export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
 
+  /* VARIABLE QUE CONTROLA EL LOCALSTORAGE GENERAL */
+  private localStorageControl: StorageDataStruct = {} as StorageDataStruct
   /* NOTA: RECIBE EL EVENTO DE CERRAR O ABRIR MENU DEL PADRE LAYOUT Y ESTE A AU VEZ LO RECIBE DEL HIJO TOOLBAR */
   @Input()
   public reciveActionSideNav: Subject<boolean> = new Subject<boolean>();
@@ -61,7 +65,7 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   /* MANEJO DE ARREGLO DE CONCEPTOS A MOSTRAR */
   public conceptsArr = signal<DataConceptsStruct[]>([]);
   public showMessage = signal<boolean>(false);
-  public showMessage_errReq = signal<boolean>(false);
+
   /*NOTA: LISTA DE CONCEPTOS DE LA DEPENDENCIA SELECCIONADA */
   public itemsConceptos = signal<DataConceptsStruct[]>([]);
 
@@ -76,29 +80,13 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reciveActionSideNav.subscribe(() => {
       this.changSidenav.toggle();
     });
+
     /* NOTA: SE EJECUTA CUANDO EN EL TOOLBAR SE PRECIONA HOME  */
     this.eraseLocalStor.subscribe(() => {
-      //localStorage.clear();
-      localStorage.removeItem('hbtw_contribuyente_only');
-      localStorage.removeItem('hbtw_vehicle_data');
-      localStorage.removeItem('hbtw_vehicle_data_adicional');
-      localStorage.removeItem('hbtw_datos_poliza');
-      localStorage.removeItem('hbtw_datos_cobro');
-      localStorage.removeItem('hbtw_idParent');
-      localStorage.removeItem('hbtw_gestora');
-      localStorage.removeItem('hbtw_route_origen');
-      localStorage.removeItem('hbtw_concept');
-      localStorage.removeItem('hbtw_contribuyente');
-      localStorage.removeItem('hbtw_datos_poliza');
-      localStorage.removeItem('hbtw_repetir_concepto');
-      localStorage.removeItem('hbtw_cachestore');
-
       this.conceptsArr.set([]);
       //this.changSidenav.toggle();
       this.showMessage.set(true);
-      this.showMessage_errReq.set(false);
       this.showBack.set(false);
-      this.router.navigate(['/dashboard/portal-hacienda-servicios']);//['/pagos']);
     })
   }
 
@@ -110,9 +98,12 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.valDependenciaCard.subscribe(resp => {
       //this.processChangeOnView(resp[0].padreId);
       console.log(resp)
-      localStorage.removeItem('hbtw_idParent');
+      this.localStorageControl.hbtw_idParent = []
       this.activeIdParent(resp[0].pk, 0, resp[0].pk);
     });
+    if(!!localStorage.getItem('hbtw_general')) {
+      this.localStorageControl = new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt() as StorageDataStruct;
+    }
   }
 
   ngOnDestroy(): void {
@@ -122,16 +113,17 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   activeIdParent(padreId: number, idConcepto: number, id: number) {
-    let x: IdPadre[] = JSON.parse(localStorage.getItem('hbtw_idParent')!);
-    if (x) {
-      x.push({ 'padreId': padreId });//x.forEach(() => x.push({ 'padreId': padreId }))
-      localStorage.setItem('hbtw_idParent', JSON.stringify(x));
+    console.log(this.localStorageControl.hbtw_idParent)
+    if (!!this.localStorageControl.hbtw_idParent) {
+      this.localStorageControl.hbtw_idParent.push({ padreId: padreId });
     } else {
-      localStorage.setItem('hbtw_idParent', JSON.stringify([{ padreId: padreId }]));
+      this.localStorageControl.hbtw_idParent = [{padreId:padreId}]
     }
+    console.log(this.localStorageControl.hbtw_idParent)
+    new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
 
     this.buildMenu((idConcepto > 0) ? idConcepto : id);
-    if (JSON.parse(localStorage.getItem('hbtw_idParent')!).length > 1)
+    if (this.localStorageControl.hbtw_idParent.length > 1)
       this.showBack.set(true);
 
     return;
@@ -139,7 +131,7 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   buildMenu(padreId: number) {
     this.isLoading.set(true);
-    if (!localStorage.getItem('hbtw_idParent') || JSON.parse(localStorage.getItem('hbtw_idParent')!).length <= 1) {
+    if (!!this.localStorageControl.hbtw_idParent){//localStorage.getItem('hbtw_idParent') || JSON.parse(localStorage.getItem('hbtw_idParent')!).length <= 1) {
       this.showBack.set(false);
     }
     this.generalService.requestConceptos(padreId)
@@ -150,7 +142,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
           if (result.length > 0) {
             this.generalService.conceptoStorage = result;
             this.showMessage.set(false);
-            this.showMessage_errReq.set(false);
             this.conceptsArr.set(result);//update(() => [...this.conceptsArr(), result]);
             this.isLoading.set(false);
             if (this.changSidenav.opened == false)
@@ -163,7 +154,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isLoading.set(false);
           return;
         }
-        this.showMessage_errReq.set(true);
         this.isLoading.set(false);
         this.conceptsArr.set([]);
       });
@@ -172,18 +162,20 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   backMenu() {
-    if (localStorage.getItem('hbtw_idParent')) {
-      localStorage.removeItem('hbtw_contribuyente');
-      let idParent: IdPadre[] = JSON.parse(localStorage.getItem('hbtw_idParent')!);
-      const idControl = idParent[idParent.length - 2].padreId;
-      idParent.pop();
-      if (idParent.length === 0) {
-        localStorage.removeItem('hbtw_idParent');
+    console.log(!!this.localStorageControl.hbtw_idParent);
+    if (!!this.localStorageControl.hbtw_idParent) {
+      this.localStorageControl.hbtw_contribuyente = {} as VehicleDataResponseStruct
+      const idControl = this.localStorageControl.hbtw_idParent?.slice(-2)[0].padreId// idParent[idParent.length - 2].padreId;
+      this.localStorageControl.hbtw_idParent?.pop();
+      if (!!!this.localStorageControl.hbtw_idParent) {
+        this.localStorageControl.hbtw_idParent = [];
         this.showBack.set(false);
       }
-      localStorage.setItem('hbtw_idParent', JSON.stringify(idParent))
-      this.buildMenu(idControl);
-      this.router.navigate(['/dashboard/portal-hacienda-servicios', true]);
+
+      new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
+
+      this.buildMenu(idControl!);
+      this.router.navigate(['/dashboard/portal-hacienda-servicios']);
       return;
     }
     return;
@@ -227,20 +219,24 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   dellLocalStore() {
-    if (localStorage.getItem('hbtw_contribuyente_only'))
-      localStorage.removeItem('hbtw_contribuyente_only');
-    if (localStorage.getItem('hbtw_vehicle_data'))
-      localStorage.removeItem('hbtw_vehicle_data');
-    if (localStorage.getItem('hbtw_vehicle_data_adicional'))
-      localStorage.removeItem('hbtw_vehicle_data_adicional');
-    if (localStorage.getItem('hbtw_datos_poliza'))
-      localStorage.removeItem('hbtw_datos_poliza');
-    if (localStorage.getItem('hbtw_datos_cobro'))
-      localStorage.removeItem('hbtw_datos_cobro');
+    if (!!this.localStorageControl.hbtw_contribuyente_only)
+      this.localStorageControl.hbtw_contribuyente_only = "";
+    if (!!this.localStorageControl.hbtw_vehicle_data)
+      this.localStorageControl.hbtw_vehicle_data = {} as VehicleDataRequestStruct;
+    if (!!this.localStorageControl.hbtw_vehicle_data_adicional)
+      this.localStorageControl.hbtw_vehicle_data_adicional = "";
+    if (!!this.localStorageControl.hbtw_datos_poliza)
+      this.localStorageControl.hbtw_datos_poliza = {} as PolizaDataResponse;
+    if (!!this.localStorageControl.hbtw_datos_cobro)
+      this.localStorageControl.hbtw_datos_cobro = "";
+
+    new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
+
   }
 
   buildTitle(concept: string) {
-    localStorage.setItem('hbtw_concept', concept);
+    this.localStorageControl.hbtw_concept = concept;
+    new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
     this.nameConcept.emit(concept);
   }
 
@@ -250,9 +246,14 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     */
       if (Number(gestora) > 0) {
         if (this.generalService.conceptoStorage.filter(resp => resp.idConcepto === Number(idConcepto) && resp.combinable == 1).length == 0) {
-          (localStorage.getItem('hbtw_contribuyente')) ? localStorage.removeItem('hbtw_contribuyente') : '';
+          !!this.localStorageControl.hbtw_contribuyente?this.localStorageControl.hbtw_contribuyente = {} as VehicleDataResponseStruct : '';
         }
       }
+
+      this.localStorageControl.hbtw_gestora = String(gestora);
+      this.localStorageControl.hbtw_route_origen = item;
+
+      new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
 
       if (new RegExp('^(?:https?):\/\/?').test(item)) {
         window.open(`${item}`);
@@ -260,9 +261,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.dellLocalStore();
-
-      localStorage.setItem('hbtw_gestora', String(gestora));
-      localStorage.setItem('hbtw_route_origen', item);
 
       idConcepto = idConcepto.toString();
       if (idConcepto === "0" && gestora === 0) {

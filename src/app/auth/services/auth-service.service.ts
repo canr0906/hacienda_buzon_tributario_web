@@ -33,7 +33,7 @@ export class AuthServiceService {
   public authStatus  = computed( () => this._authStatus() );
 
   constructor() {
-    this.checkAuthStatus().subscribe(()=>console.log('Se Ejecuta el CheckAuth'));
+    //this.checkAuthStatus().subscribe(()=>console.log('Se Ejecuta el CheckAuth'));
   }
 
   /* ALMACENA EN LOCALSTORA LA ESTRUCTURA RETORNADA POR APIREST Y PONE EL STATUS DE DE AUTENTIFICACION EN AUTENTICADO */
@@ -50,14 +50,51 @@ export class AuthServiceService {
   }
 
   checkAuthStatus(): Observable<boolean> {
-    const url = `${this.baseUrlApi}/auth/check-token`;
+    const url = `${this.urlApiRestNest}auth/token-renew`;
+    let headers = new HttpHeaders();
+    headers = headers.set("Content-Type", "application/json")
 
-    if(!!localStorage.getItem('token')) {
-      this.logout();
-      return of(false);
+    console.log(!!localStorage.getItem('hbtw_token'))
+    if(!!localStorage.getItem('hbtw_token')) {
+      const user = new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt();
+      const token = new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt();
+          console.log(token)
+
+          headers = headers.set("Content-Type", "application/json")
+            .set("Authorization", "Bearer " + token.toString());
+            console.log(headers)
+          return this.http.post<LoginResponseStruct>(url,JSON.stringify(user),{headers})
+            .pipe(
+              tap(r => console.log(r)),
+              map(data=>{
+                console.log(data)
+                if(!!data.token) {
+                  new DataEncrypt(data.token).dataEncript('hbtw_token');
+                  return true;
+                }
+                return false;
+              }),
+              catchError( err =>{
+                console.log(err);
+                let message = '';
+                return throwError( () => {
+                  if(err.status==401) {
+                    if(typeof err.error.message == 'object') {
+                      Object.keys(err.error.message).map(key => message += err.error.message[key]);
+                    } else {
+                      message = err.error.message;
+                    }
+                  } else {
+                    message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
+                  }
+                  return message;
+                });
+              })
+            )
+
     }
 
-    return of(true);
+    return of(false);
   }
 
   login(loginRequest: LoginRequestStruct): Observable<ResponseGeneral> {
@@ -131,7 +168,9 @@ export class AuthServiceService {
   }
 
   logout(): void {
-    localStorage.clear();
+    localStorage.removeItem('hbtw_user');
+    localStorage.removeItem('hbtw_token');
+    localStorage.removeItem('hbtw_general');
     this._currentUser.set(null);
     this._authStatus.set( AuthStatusStruct.notAuthenticated );
   }

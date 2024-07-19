@@ -7,11 +7,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
+import { AuthServiceService } from '@auth/services/auth-service.service';
 import { VehicleDataComponent } from '@dashboard/components/smyt/vehicle-data/vehicle-data.component';
 import { SmytService } from '@dashboard/services/smyt/smyt.service';
+import { DataDecrypt } from '@shared/classes/data-decrypt';
 
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 import { SnackBarComponent } from '@shared/components/snack-bar/snack-bar.component';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: true,
@@ -35,6 +38,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
   private smytService  = inject(SmytService);
   private router       = inject(Router);
   private _snackBar    = inject(MatSnackBar);
+  private authService  = inject(AuthServiceService);
 
   //Controla la visualización del Spinner
   public isLoading = signal<boolean>(false);
@@ -45,13 +49,30 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
   public signalTrue = signal<boolean>(true);
   public signalFalse = signal<boolean>(false);
 
+  public isAuthenticated = signal<boolean>(false);
+
   @ViewChild(VehicleDataComponent)
   private childComponent!: VehicleDataComponent;
 
   ngOnInit(): void {
     this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
     if(!!localStorage.getItem('hbtw_token')) {
-
+      console.log(new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt())
+      console.log(new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt())
+      this.authService.checkAuthStatus()
+        .subscribe({
+          next:(resp) => {
+            console.log(resp)
+            if(resp) {
+              this.isAuthenticated.set(true);
+            }
+          },
+          error: (message) => {
+            this.isLoading.set(false);
+            Swal.fire('Error', message, 'error');
+          },
+          complete: () => {}
+        })
     }
   }
   ngAfterContentInit(): void {

@@ -19,17 +19,17 @@ export class ServiciosHaciendaPortalService {
   public conceptoStorage: DataConceptsStruct[] = [];
 
   constructor() {
-    this.loadFromLocalStorage();
+    //this.loadFromLocalStorage();
   }
 
   deleteLocalStorage(): void {
     this.conceptoStorage = [];
   }
 
-  loadFromLocalStorage(): void {
+  /*loadFromLocalStorage(): void {
     if ( !localStorage.getItem('cachestore') ) return ;
     this.conceptoStorage = JSON.parse(localStorage.getItem('cachestore')!);
-  }
+  }*/
 
   /* DESCOMENTAR ESTE METODO SI SE VA A CONSUMIR POR SERVICIO Y COMENTAR SU COPIA */
   requestConceptos(id: number): Observable<DataConceptsStruct[]> {
