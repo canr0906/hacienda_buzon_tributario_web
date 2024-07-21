@@ -11,6 +11,7 @@ import { DataDecrypt } from '@shared/classes/data-decrypt';
 import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
 import { RegisterlUser } from '@auth/interfaces/register-user/register-user-struct.interfaz';
 import { RegisterDataResponse } from '@auth/interfaces/register-data-response.interfaz';
+import { Concepto } from '../../dashboard/interfaces/smyt/vehicle-data-response-struct';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,9 @@ export class AuthServiceService {
   public currentUser = computed( () => this._currentUser() );
   public authStatus  = computed( () => this._authStatus() );
 
+  private token: string='';
+  private user: UserStruct = {} as UserStruct;
+
   constructor() {
     //this.checkAuthStatus().subscribe(()=>console.log('Se Ejecuta el CheckAuth'));
   }
@@ -49,52 +53,55 @@ export class AuthServiceService {
     return true;
   }
 
+  async checkAuthStatusAsync(): Promise<boolean> {
+    try {
+      this.user = await new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt()
+      this.token = await new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt()
+      console.log(this.user)
+      console.log(this.token)
+      return true;
+    } catch(err) {
+      throw err
+    }
+    return false
+
+  }
+
   checkAuthStatus(): Observable<boolean> {
     const url = `${this.urlApiRestNest}auth/token-renew`;
     let headers = new HttpHeaders();
     headers = headers.set("Content-Type", "application/json")
 
-    console.log(!!localStorage.getItem('hbtw_token'))
-    if(!!localStorage.getItem('hbtw_token')) {
-      const user = new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt();
-      const token = new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt();
-          console.log(token)
+    headers = headers.set("Content-Type", "application/json")
+      .set("Authorization", "Bearer " + this.token);
 
-          headers = headers.set("Content-Type", "application/json")
-            .set("Authorization", "Bearer " + token.toString());
-            console.log(headers)
-          return this.http.post<LoginResponseStruct>(url,JSON.stringify(user),{headers})
-            .pipe(
-              tap(r => console.log(r)),
-              map(data=>{
-                console.log(data)
-                if(!!data.token) {
-                  new DataEncrypt(data.token).dataEncript('hbtw_token');
-                  return true;
-                }
-                return false;
-              }),
-              catchError( err =>{
-                console.log(err);
-                let message = '';
-                return throwError( () => {
-                  if(err.status==401) {
-                    if(typeof err.error.message == 'object') {
-                      Object.keys(err.error.message).map(key => message += err.error.message[key]);
-                    } else {
-                      message = err.error.message;
-                    }
-                  } else {
-                    message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
-                  }
-                  return message;
-                });
-              })
-            )
-
-    }
-
-    return of(false);
+    return this.http.post<LoginResponseStruct>(url,JSON.stringify(this.user),{headers})
+      .pipe(
+        tap(r => console.log(r)),
+        map(data=>{
+          if(!!data.token) {
+            console.log(data.token)
+            new DataEncrypt(data.token).dataEncript('hbtw_token');
+            return true;
+          }
+          return false;
+        }),
+        catchError( err =>{
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
+            }
+            return message;
+          });
+        })
+      )
   }
 
   login(loginRequest: LoginRequestStruct): Observable<ResponseGeneral> {

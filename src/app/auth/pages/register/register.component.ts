@@ -242,6 +242,7 @@ export class RegisterComponent implements AfterViewInit {
           ).then(()=>{ this.router.navigateByUrl('auth/login'); });
         },
         error: (error) => {
+          this.isLoading.set(false);
           Swal.fire({
             title: "Error !!",
             text: error,

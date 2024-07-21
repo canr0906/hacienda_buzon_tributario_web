@@ -16,6 +16,8 @@ import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner
 import { SnackBarComponent } from '@shared/components/snack-bar/snack-bar.component';
 import Swal from 'sweetalert2';
 
+import ListErrors from '@shared/data/errors.json';
+
 @Component({
   standalone: true,
   imports: [
@@ -54,27 +56,47 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
   @ViewChild(VehicleDataComponent)
   private childComponent!: VehicleDataComponent;
 
+  private listErrors = ListErrors;
+
   ngOnInit(): void {
     this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
     if(!!localStorage.getItem('hbtw_token')) {
-      console.log(new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt())
-      console.log(new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt())
-      this.authService.checkAuthStatus()
-        .subscribe({
-          next:(resp) => {
-            console.log(resp)
-            if(resp) {
-              this.isAuthenticated.set(true);
-            }
-          },
-          error: (message) => {
-            this.isLoading.set(false);
-            Swal.fire('Error', message, 'error');
-          },
-          complete: () => {}
-        })
+      this.authService.checkAuthStatusAsync()
+      .then(result => {
+        if(result) {
+          this.authService.checkAuthStatus()
+            .subscribe({
+              next:(resp) => {
+                console.log(resp)
+                if(resp) {
+                  this.isAuthenticated.set(true);
+                }
+              },
+              error: (message) => {
+                this.isLoading.set(false);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error!!",
+                  text: message
+                }).then(()=>{
+                  this.authService.logout();
+                  this.router.navigateByUrl('/auth')
+                });
+              },
+              complete: () => {}
+            });
+        } else {
+          Swal.fire('Error', `Error ${this.listErrors[0].id}. Repórtelo al CAT`, 'error');
+        }
+      })
+      .catch(error=>{
+        Swal.fire('Error', error.message, 'error');
+      })
+
+      /**/
     }
   }
+
   ngAfterContentInit(): void {
     setTimeout(() => {
       this.myForm.addControl('primary_form', this.childComponent.myFormSmyt);
