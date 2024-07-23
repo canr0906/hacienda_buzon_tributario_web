@@ -39,6 +39,7 @@ export class ServicesMenuComponent implements OnInit {
 
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: string): void {
+    console.log(id)
     if(id.includes('buzon-tributario')) {
       if(!localStorage.getItem('hbtw_token')) {
         Swal.fire('Error', "Para tener acceso a este modulo necesita generar un registro", 'error');

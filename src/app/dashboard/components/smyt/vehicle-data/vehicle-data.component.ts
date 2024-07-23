@@ -18,6 +18,7 @@ import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
 
 import MessagesLists from '@shared/data/messages.json'
 import { ValidatorsService } from '@shared/services/validators.service';
+import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
 
 
 @Component({
@@ -71,6 +72,12 @@ export class VehicleDataComponent implements OnInit {
 
   @Input({required:true})
   public disableDate= signal<boolean>(false);
+
+  @Input({required:true})
+  public isAuthInParent = signal<boolean>(false);
+
+  @Input()
+  public arrSeries = signal<VehicleBySerie[]>([])
 
   @Output()
   private tipoVehiculoEmit = new EventEmitter<number>();
@@ -182,6 +189,10 @@ export class VehicleDataComponent implements OnInit {
 
   changeFielVehicleType(value: any) {
     this.tipoVehiculoEmit.emit(value);
+  }
+
+  getSerie(val:any){
+    this.myFormSmyt.get('serie')?.setValue(this.arrSeries().filter(resp => resp.placa==val)[0].no_serie)
   }
 
 }

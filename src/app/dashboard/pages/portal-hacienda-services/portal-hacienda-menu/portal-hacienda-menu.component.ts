@@ -41,9 +41,9 @@ export class PortalHaciendaMenuComponent implements OnInit, OnDestroy {
     this.parentLayout.showoptions.set(true);
 
     this.activRouteSubs = this.activRoute.params.subscribe(({ flag }) => {
-      if (!flag) {
+      /*if (!flag) {
         this.parentLayout.redirectHome(true);
-      }
+      }*/
       this.generalService.requestConceptos(0)
         .subscribe({
           next: (conceptos) => {

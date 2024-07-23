@@ -2,5 +2,9 @@
   {
     "id":410,
     "type": "Error de desencriptar de datos"
+  },
+  {
+    "id":411,
+    "type": "No se tienen datos asociados a vehiculos"
   }
 ]

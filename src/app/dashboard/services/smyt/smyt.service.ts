@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { OfficesResponseStruct } from '@dashboard/interfaces/smyt/offices-response-struct.interfaz';
 import { environments } from '@environments/environments';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 import OficinasTramite from '@dashboard/data/smyt/oficinas_tramite.json'
 import TipoVehiculo from '@dashboard/data/smyt/vehicle_type.json'
@@ -10,6 +10,10 @@ import { VehicleTypeResponseStruct } from '@dashboard/interfaces/smyt/vehicle-ty
 import { VehicleDataRequestStruct } from '@dashboard/interfaces/smyt/vehicle-data-request-struct';
 import { VehicleDataResponseStruct } from '@dashboard/interfaces/smyt/vehicle-data-response-struct';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { DataDecrypt } from '@shared/classes/data-decrypt';
+
+import ListErrors from '@shared/data/errors.json';
+import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +23,12 @@ export class SmytService {
   private readonly baseUrlHacienda: string = environments.BASE_URL_SERVHACIENDA;
   private readonly userServiceHacienda: string = environments.USER_SERVER_APIREST;
   private readonly passServiceHacienda: string = environments.PASS_SERVER_APIREST;
+  private readonly urlApiRestNest: string = environments.URL_SERVICIOSHACIENDA_NEST;
   //private urlSOAP:string = environments.BASE_URL_SERV;
   private http = inject(HttpClient);
+
+  /* LISTA DE ERRORES */
+  private listErrors = ListErrors;
 
   constructor() { }
 
@@ -46,11 +54,56 @@ export class SmytService {
     return of({success:true,data:TipoVehiculo});
   }
 
+  /* METODO ENCARGADO DE OBTENER LAS SERIES DE VEHICULO ALMACENADOS EN LOCALSTORAGE */
+  async getVehicleDataAsync(): Promise<string> {
+    try {
+      return await new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt()
+        .then(response =>{
+          if(!!response[0].VEHICULOS) {
+            return response[0].VEHICULOS
+          } else {
+            throw {message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
+          }
+        });
+    } catch(err) {
+      throw err;
+    }
+  }
+
+  getVehicleData(series:string, token:string): Observable<VehicleBySerie[]> {
+    const url = `${this.urlApiRestNest}smyt-services/datavehicle`;
+    let headers = new HttpHeaders();
+    headers = headers.set("Content-Type", "application/json")
+
+    headers = headers.set("Content-Type", "application/json")
+      .set("Authorization", "Bearer " + token);
+
+    return this.http.post<VehicleBySerie[]>(url,JSON.stringify({"serie":series}),{headers})
+      .pipe(
+        map(resp => resp),
+        catchError( err =>{
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = "Error 500, reportelo al CAT e intentelo mas tarde";
+            }
+            return message;
+          });
+        })
+      )
+  }
+
   validateVehicle(datosTramite:VehicleDataRequestStruct): Observable<VehicleDataResponseStruct | null> {
     let headers = new HttpHeaders();
     headers = headers.set("Content-Type", "application/json")
       .set("Authorization", "Basic " + btoa(`${this.userServiceHacienda}:${this.passServiceHacienda}`));
-
+    console.log(datosTramite)
     return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/smyt/particular`,JSON.stringify(datosTramite),{headers})
       .pipe(
         catchError(error => of())

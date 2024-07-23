@@ -13,6 +13,8 @@ import { RegisterlUser } from '@auth/interfaces/register-user/register-user-stru
 import { RegisterDataResponse } from '@auth/interfaces/register-data-response.interfaz';
 import { Concepto } from '../../dashboard/interfaces/smyt/vehicle-data-response-struct';
 
+import ListErrors from '@shared/data/errors.json';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,6 +38,9 @@ export class AuthServiceService {
   private token: string='';
   private user: UserStruct = {} as UserStruct;
 
+  /* LISTA DE ERRORES */
+  private listErrors = ListErrors;
+
   constructor() {
     //this.checkAuthStatus().subscribe(()=>console.log('Se Ejecuta el CheckAuth'));
   }
@@ -53,12 +58,14 @@ export class AuthServiceService {
     return true;
   }
 
+  getToken(): string {
+    return this.token;
+  }
+  /* DESENCRIPTA DATOS DE USUARIO Y TOKEN */
   async checkAuthStatusAsync(): Promise<boolean> {
     try {
-      this.user = await new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt()
+      this.user = await new DataDecrypt(localStorage.getItem('hbtw_user')!).dataDecrypt().then(response => response[0])
       this.token = await new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt()
-      console.log(this.user)
-      console.log(this.token)
       return true;
     } catch(err) {
       throw err
@@ -66,7 +73,7 @@ export class AuthServiceService {
     return false
 
   }
-
+  /* METODO OBSERVABLE ENCARGADO DE RENOVAR EL TOKEN, SUSTITUIRLO EN LOCALSTORAGE  */
   checkAuthStatus(): Observable<boolean> {
     const url = `${this.urlApiRestNest}auth/token-renew`;
     let headers = new HttpHeaders();
@@ -96,7 +103,7 @@ export class AuthServiceService {
                 message = err.error.message;
               }
             } else {
-              message = "Problemas de comunicación con el servidor, reporte el error 500 al CAT e intentelo mas tarde";
+              message = "Error 500, reportelo al CAT e intentelo mas tarde";
             }
             return message;
           });

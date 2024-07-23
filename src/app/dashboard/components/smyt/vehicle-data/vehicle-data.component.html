@@ -23,7 +23,15 @@
   @if (!disabledPlaca()) {
   <mat-form-field class="col" appearance="outline">
     <mat-label>Placa</mat-label>
+    @if (!isAuthInParent()) {
     <input matInput type="text" formControlName="placa">
+    } @else {
+      <mat-select formControlName="placa" (valueChange)="getSerie($event)">
+        @for (serie of arrSeries(); track serie.id) {
+        <mat-option [value]="serie.placa">{{serie.placa}}</mat-option>
+        }
+      </mat-select>
+    }
     <mat-error>{{ getMessage(myFormSmyt.get('placa')?.getError('error'),'placa') }}</mat-error>
   </mat-form-field>
   }

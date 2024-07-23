@@ -17,6 +17,9 @@ import { SnackBarComponent } from '@shared/components/snack-bar/snack-bar.compon
 import Swal from 'sweetalert2';
 
 import ListErrors from '@shared/data/errors.json';
+import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
+import { DataEncrypt } from '@shared/classes/data-encrypt';
+import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
 
 @Component({
   standalone: true,
@@ -53,23 +56,31 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
 
   public isAuthenticated = signal<boolean>(false);
 
+  /* ALMACENA LAS PLACAS ASOCIADAS A LAS SERIES ALMACENADAS EN LOCALSTORAGE. SE LE PASAN A VEHICLE-DATA.COMPONENT */
+  public arrDataVehicle = signal<VehicleBySerie[]>([])
+
   @ViewChild(VehicleDataComponent)
   private childComponent!: VehicleDataComponent;
 
   private listErrors = ListErrors;
 
   ngOnInit(): void {
+    /* SI EXISTE TOKEN SE ASUME QUE ES UN USUARIO REGISTRADO */
     this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
     if(!!localStorage.getItem('hbtw_token')) {
+      /* METODO ASINCRONO QUE SESENCRIPTA DATOS DE USUARIO Y TOKEN */
       this.authService.checkAuthStatusAsync()
       .then(result => {
         if(result) {
+          /* OBSERVABLE QUE RENUEVA EL TOKEN */
           this.authService.checkAuthStatus()
             .subscribe({
               next:(resp) => {
                 console.log(resp)
                 if(resp) {
                   this.isAuthenticated.set(true);
+                  /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
+                  this.getVehicleData(this.authService.getToken());
                 }
               },
               error: (message) => {
@@ -109,6 +120,31 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
       this.myForm.get('primary_form')!.get('serie')!.enable();
     },200);
   }
+  /* METODO ENCARGADO DE  OBTENER LAS SERIES VEHICULARES Y CONSULTAR SUS PLACAS*/
+  getVehicleData(token:string) {
+    this.smytService.getVehicleDataAsync()
+      .then(response => {
+        this.smytService.getVehicleData(response,token)
+          .subscribe({
+            next:(resp)=>{
+              console.log(resp)
+              this.arrDataVehicle.set(resp)
+            },
+            error: (message) => {
+              this.isLoading.set(false);
+              Swal.fire({
+                icon: "error",
+                title: "Error!!",
+                text: message
+              }).then(()=>{});
+            },
+            complete: () => {}
+          })
+      })
+      .catch(error=>{
+        Swal.fire('Error', error.message, 'error');
+      })
+  }
 
   onSubmit(): void {
     this.isLoading.set(true);
@@ -116,25 +152,39 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
       this.isLoading.set(false);
       return;
     }
-    const reqData = {
+    let reqData: StorageDataStruct = {} as StorageDataStruct;
+
+    /*= {
       "placa": this.myForm.get('primary_form')?.get('placa')?.value,
       "tramite": 1,
       "obtenerContribuyente": true
-    }
-    localStorage.setItem('hbtw_vehicle_data_admin', JSON.stringify(reqData));
-    this.smytService.validateVehicle(reqData)
-      .subscribe(resp => {
-        if (resp?.success) {
-          this.router.navigate(['/dashboard/tabla-conceptos',1]);
-          return
-        }
-        this._snackBar.openFromComponent(SnackBarComponent, {
-          data: resp?.data,
-          duration: 3000,panelClass: ["snack-notification"],horizontalPosition: "center",verticalPosition: "top",
-        });
+    }*/
 
-        this.isLoading.set(false);
+    reqData.hbtw_vehicle_data!.placa = this.myForm.get('primary_form')?.get('placa')?.value;
+    reqData.hbtw_vehicle_data!.tramite = 1;
+    reqData.hbtw_vehicle_data!.obtenerContribuyente = true;
+
+    localStorage.setItem('hbtw_vehicle_data', JSON.stringify(reqData));
+    //StorageDataStruct
+    new DataEncrypt(reqData).dataEncript('hbtw_general')
+      .then(resp => {
+        this.smytService.validateVehicle(reqData.hbtw_vehicle_data!)
+          .subscribe(resp => {
+            if (resp?.success) {
+              this.router.navigate(['/dashboard/tabla-conceptos',1]);
+              return
+            }
+            this._snackBar.openFromComponent(SnackBarComponent, {
+              data: resp?.data,
+              duration: 3000,panelClass: ["snack-notification"],horizontalPosition: "center",verticalPosition: "top",
+            });
+
+            this.isLoading.set(false);
+          });
+      }).catch(err =>{
+
       });
+
   }
 
 }

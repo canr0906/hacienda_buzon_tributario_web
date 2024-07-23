@@ -100,7 +100,14 @@ export class LayoutDashComponent implements OnDestroy {
     this.sendActEraseLocalStor.next(true);
 
     localStorage.removeItem('hbtw_general');
+    const currentRoute = this.router.url.split('/');
+    console.log(this.router.url.split('/').includes('portal-hacienda-servicios'));
+    if(currentRoute[currentRoute.length-1].includes('portal-hacienda-servicios')) {
+      this.router.navigate(['/dashboard/sevices-menu']);//['/pagos']);
+      return;
+    }
     this.router.navigate(['/dashboard/portal-hacienda-servicios']);//['/pagos']);
+    return;
   }
 
   /* RECIBE VALORES DEL COMPONENTE HIJO TOOLBAR AL PRECIONAR MENU*/
