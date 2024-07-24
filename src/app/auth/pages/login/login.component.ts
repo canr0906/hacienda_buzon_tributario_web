@@ -71,7 +71,7 @@ export class LoginComponent {
       this.tipo_identificaion.set("2");
     }
     this.loginRequest.set({rfc:this.myForm.get('rfc')?.value,curp:this.myForm.get('curp')?.value,tipo_identificacion:this.tipo_identificaion(),password:this.myForm.get('password')?.value});//update(() => [...this.loginRequest(),this.myForm.value]);
-    console.log(this.loginRequest())
+
     this.authService.login(this.loginRequest())
       .subscribe({
         next: (resp) => {

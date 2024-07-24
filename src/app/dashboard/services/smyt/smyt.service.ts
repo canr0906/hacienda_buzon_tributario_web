@@ -103,10 +103,20 @@ export class SmytService {
     let headers = new HttpHeaders();
     headers = headers.set("Content-Type", "application/json")
       .set("Authorization", "Basic " + btoa(`${this.userServiceHacienda}:${this.passServiceHacienda}`));
-    console.log(datosTramite)
+
     return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/smyt/particular`,JSON.stringify(datosTramite),{headers})
       .pipe(
-        catchError(error => of())
+        catchError(err =>{
+          let message = '';
+          return throwError( () => {
+            if(err.status == 401 || err.status == 404) {
+              message = `Error ${this.listErrors[3].id}, seccion Validación de Vehículo. Repórtelo al CAT e intentelo mas tarde`;
+            } else {
+              message = "Error 500, seccion Validación de Vehículo. Repórtelo al CAT e intentelo mas tarde";
+            }
+            return {message: message, code: `500`};
+          });
+        })
       );
   }
 

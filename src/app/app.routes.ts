@@ -45,6 +45,11 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/pages/portal-hacienda-services/smyt/refrendo/refrendo.component').then(c=>c.RefrendoComponent)
       },
       {
+        path: 'tabla-conceptos/:idConcepto',
+        title: 'Tabla de Conceptos',
+        loadComponent: () => import('./dashboard/components/tabla-calculo-conceptos/tabla-calculo-conceptos.component').then(c =>c.TablaCalculoConceptosComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard/sevices-menu',
         pathMatch: 'full'

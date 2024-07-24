@@ -84,10 +84,8 @@ export class AuthServiceService {
 
     return this.http.post<LoginResponseStruct>(url,JSON.stringify(this.user),{headers})
       .pipe(
-        tap(r => console.log(r)),
         map(data=>{
           if(!!data.token) {
-            console.log(data.token)
             new DataEncrypt(data.token).dataEncript('hbtw_token');
             return true;
           }
@@ -122,7 +120,6 @@ export class AuthServiceService {
 
     return this.http.post<LoginResponseStruct>(url,JSON.stringify(loginRequest),{headers})
       .pipe(
-        tap(resp => console.log(resp)),
         map(data => {
           if(Object.keys(data.user).length>0) {
             generalResponse.mensaje = 'ok';

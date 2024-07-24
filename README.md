@@ -14,6 +14,19 @@ hbtw_general -> contendra todos los datos que usaran los modulos
       localStorage.removeItem('hbtw_repetir_concepto');
       localStorage.removeItem('hbtw_cachestore');
 
+      hbtw_idParent?: StorageDataParentStruct[];
+      hbtw_gestora?: string;
+      hbtw_route_origen?: string;
+      hbtw_concept?: string;
+      hbtw_vehicle_data?: VehicleDataRequestStruct;
+      hbtw_contribuyente?: VehicleDataResponseStruct;
+      hbtw_datos_poliza?: PolizaDataResponse;
+
+      hbtw_contribuyente_only?: string;
+      hbtw_vehicle_data_adicional?: string;
+      hbtw_datos_cobro?: string;
+
+
     {
         
         

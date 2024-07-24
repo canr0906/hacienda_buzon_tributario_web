@@ -120,8 +120,6 @@ export class VehicleDataComponent implements OnInit {
     this._locale = 'es';
     this._adapter.setLocale(this._locale);
 
-    console.log('VALOR DE OFICINA:::' + this.disablesOffice())
-
     this.smytService.getOficinas()
       .subscribe({
         next:(resp) => {

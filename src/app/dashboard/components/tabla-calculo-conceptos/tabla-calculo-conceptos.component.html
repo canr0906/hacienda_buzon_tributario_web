@@ -1,0 +1,189 @@
+@if (isLoading()) {
+  <load-spinner></load-spinner>
+  }
+  @if (sizeDisplay==='XSmall' || sizeDisplay==='Small') {
+  <div>
+    <mat-nav-list>
+      <mat-toolbar color="" class="my-toolbar" [class.mat-elevation-z1]="true">
+        <button mat-mini-fab color="primary" routerLink="/dashboard"><!--routerLink="/pagos/{{route_origen}}"-->
+          <mat-icon>cancel</mat-icon>
+        </button>
+        <span class="spacer"></span>
+        <span>Total: {{total() | currency}}</span>
+        <span class="spacer"></span>
+        <button mat-mini-fab color="primary" (click)="datosContribuyente()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </mat-toolbar>
+      @for (item of conceptos; track item.id; let i = $index) {
+      <mat-list-item [lines]="item.descripcion.length/35 + 4" [style]="{'background-color':(i%2==0)?'#e8d0fc':'#f5f5f5'}">
+        <div matListItemLine routerLinkActive="active">
+          <span style="font-size: 13px;" [innerHTML]="item.descripcion | segmentText:43"></span>
+        </div>
+        <div matListItemLine>
+          <b>Ejercico:</b> <span [innerHTML]="item.ejercicioFiscal"></span>
+        </div>
+        <div matListItemLine>
+          <b>Costo Unitario:</b> <span [innerHTML]="item.importeUnitario | currency:'MXN':'symbol-narrow':'1.2-2'"></span>
+        </div>
+        <div matListItemLine>
+          <b>cantidad:</b>
+          @if (tipoFormEdit() && !tipoFormEdit_hoja()) {
+          <div [formGroup]="formTableCal">
+            @for (controls of cantidadPago.controls; track controls; let x = $index) {
+            <div>
+              @if(x==i) {
+              <div formArrayName="cantidadPago">
+                <mat-form-field fxFlex style="margin-right:0.5em;" appearance="outline">
+                  <input matInput type="number" [formControlName]="x" (change)="sendCant(x)"
+                    onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" min="0">
+                </mat-form-field>
+              </div>
+              }
+            </div>
+            }
+          </div>
+          } @else {
+          <span [innerHTML]="item.cantidad | number"></span>
+          }
+        </div>
+        @if (tipoFormEdit_hoja()) {
+        <div matListItemLine>
+          <b>No hoja:</b>
+          @if (!tipoFormEdit() && tipoFormEdit_hoja()) {
+          <div [formGroup]="formTableCal">
+            @for (item of cantidadPago.controls; track item; let x = $index) {
+            <div>
+              @if (x == i) {
+              <div formArrayName="cantidadPago">
+                <mat-form-field fxFlex style="margin-right:0.5em;" appearance="outline">
+                  <input matInput type="number" [formControlName]="x" (change)="sendCant(x)"
+                    onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" min="1">
+                </mat-form-field>
+              </div>
+              }
+            </div>
+            }
+          </div>
+          } @else {
+          <span [innerHTML]="item.cantidad | number"></span>
+          }
+        </div>
+        }
+        <div matListItemLine>
+          <b>Subtotal:</b> <span [innerHTML]="item.importe | currency:'MXN':'symbol-narrow':'1.2-2'"></span>
+        </div>
+
+        <span>
+          <mat-divider></mat-divider>
+        </span>
+      </mat-list-item>
+      }
+    </mat-nav-list>
+
+
+
+
+  </div>
+  } @else {
+
+
+  <table mat-table [dataSource]="conceptos" class="mat-elevation-z8">
+    <!-- Item Column -->
+    <ng-container matColumnDef="descripcion">
+      <th mat-header-cell *matHeaderCellDef> Descricpion </th>
+      <td mat-cell *matCellDef="let concepto;"> {{concepto.descripcion}} </td>
+      <td mat-footer-cell *matFooterCellDef>
+        <div class="example-button-row">
+          <!--button mat-stroked-button color="warn" routerLink="/pagos/{{route_origen}}"-->
+          <button mat-stroked-button color="warn" routerLink="/dashboard">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+          <button mat-stroked-button color="primary" (click)="datosContribuyente()">
+            <mat-icon>chevron_right</mat-icon>
+            Continuar
+          </button>
+        </div>
+      </td>
+
+    </ng-container>
+
+    <ng-container matColumnDef="ejercicioFiscal">
+      <th mat-header-cell *matHeaderCellDef> Ejercicio </th>
+      <td mat-cell *matCellDef="let concepto"> {{concepto.ejercicioFiscal}} </td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+
+    </ng-container>
+    <ng-container matColumnDef="importe">
+      <th mat-header-cell *matHeaderCellDef> Costo Unitario </th>
+      <td mat-cell *matCellDef="let concepto"> {{concepto.importeUnitario | currency:'MXN':'symbol-narrow':'1.2-2'}} </td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+
+    </ng-container>
+    <ng-container matColumnDef="cantidad">
+      <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+      <td mat-cell *matCellDef="let concepto; let i = index;">
+        @if (tipoFormEdit() && !tipoFormEdit_hoja()) {
+        <div [formGroup]="formTableCal">
+          @for (controls of cantidadPago.controls; track controls; let x = $index) {
+          <div>
+            @if (x == i) {
+            <div formArrayName="cantidadPago">
+              <mat-form-field fxFlex style="margin-right:0.5em;" appearance="outline">
+                <input matInput type="number" [formControlName]="x" (change)="sendCant(x)"
+                  onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" min="0">
+              </mat-form-field>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        } @else {
+        {{concepto.cantidad | number}}
+        }
+      </td>
+      <td mat-footer-cell *matFooterCellDef> Total </td>
+
+    </ng-container>
+    @if (tipoFormEdit_hoja()) {
+    <ng-container matColumnDef="no_hojas">
+      <th mat-header-cell *matHeaderCellDef> No Hojas </th>
+      <td mat-cell *matCellDef="let concepto; let i = index;">
+        @if (!tipoFormEdit() && tipoFormEdit_hoja()) {
+        <div [formGroup]="formTableCal">
+          @for (item of cantidadPago.controls; track item; let x = $index) {
+          <div>
+            @if (x == i) {
+            <div formArrayName="cantidadPago">
+              <mat-form-field fxFlex style="margin-right:0.5em;" appearance="outline">
+                <input matInput type="number" [formControlName]="x" (change)="sendCant(x)"
+                  onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" min="1">
+              </mat-form-field>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        } @else {
+        {{concepto.cantidad | number}}
+        }
+      </td>
+      <td mat-footer-cell *matFooterCellDef> Total </td>
+
+    </ng-container>
+    }
+    <ng-container matColumnDef="subtotal">
+      <th mat-header-cell *matHeaderCellDef> Subtotal </th>
+      <td mat-cell *matCellDef="let concepto"> {{concepto.importe | currency:'MXN':'symbol-narrow':'1.2-2'}} </td>
+      <td mat-footer-cell *matFooterCellDef> {{total()| currency}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+    <!--tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'highlight': selectedRowIndex == row.id}" (click)="selectRow(row)"></tr-->
+    <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
+    <tr mat-footer-row *matFooterRowDef="displayedColumns(); sticky: true"></tr>
+  </table>
+  }
+
+  <!--/section-->

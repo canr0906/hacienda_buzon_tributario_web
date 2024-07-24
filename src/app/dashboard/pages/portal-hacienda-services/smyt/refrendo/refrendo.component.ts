@@ -66,7 +66,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
 
   ngOnInit(): void {
     /* SI EXISTE TOKEN SE ASUME QUE ES UN USUARIO REGISTRADO */
-    this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
+    //this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
     if(!!localStorage.getItem('hbtw_token')) {
       /* METODO ASINCRONO QUE SESENCRIPTA DATOS DE USUARIO Y TOKEN */
       this.authService.checkAuthStatusAsync()
@@ -76,7 +76,6 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
           this.authService.checkAuthStatus()
             .subscribe({
               next:(resp) => {
-                console.log(resp)
                 if(resp) {
                   this.isAuthenticated.set(true);
                   /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
@@ -97,7 +96,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
               complete: () => {}
             });
         } else {
-          Swal.fire('Error', `Error ${this.listErrors[0].id}. Repórtelo al CAT`, 'error');
+          Swal.fire('Error', `Error ${this.listErrors[0].id}, seccion Refrendo. Repórtelo al CAT`, 'error');
         }
       })
       .catch(error=>{
@@ -127,7 +126,6 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
         this.smytService.getVehicleData(response,token)
           .subscribe({
             next:(resp)=>{
-              console.log(resp)
               this.arrDataVehicle.set(resp)
             },
             error: (message) => {
@@ -154,35 +152,39 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
     }
     let reqData: StorageDataStruct = {} as StorageDataStruct;
 
-    /*= {
-      "placa": this.myForm.get('primary_form')?.get('placa')?.value,
-      "tramite": 1,
-      "obtenerContribuyente": true
-    }*/
+    reqData.hbtw_vehicle_data = {
+      placa:this.myForm.get('primary_form')?.get('placa')?.value,
+      tramite:1,
+      obtenerContribuyente:this.isAuthenticated()?false:true
+    };
 
-    reqData.hbtw_vehicle_data!.placa = this.myForm.get('primary_form')?.get('placa')?.value;
-    reqData.hbtw_vehicle_data!.tramite = 1;
-    reqData.hbtw_vehicle_data!.obtenerContribuyente = true;
-
-    localStorage.setItem('hbtw_vehicle_data', JSON.stringify(reqData));
-    //StorageDataStruct
     new DataEncrypt(reqData).dataEncript('hbtw_general')
       .then(resp => {
-        this.smytService.validateVehicle(reqData.hbtw_vehicle_data!)
-          .subscribe(resp => {
-            if (resp?.success) {
-              this.router.navigate(['/dashboard/tabla-conceptos',1]);
-              return
-            }
-            this._snackBar.openFromComponent(SnackBarComponent, {
-              data: resp?.data,
-              duration: 3000,panelClass: ["snack-notification"],horizontalPosition: "center",verticalPosition: "top",
+        if(!!resp && resp) {
+          this.smytService.validateVehicle(reqData.hbtw_vehicle_data!)
+            .subscribe({
+              next:(resp) => {
+                if (resp?.success) {
+                  this.router.navigate(['/dashboard/tabla-conceptos',1]);
+                  return
+                }
+                this._snackBar.openFromComponent(SnackBarComponent, {
+                  data: resp?.data,
+                  duration: 3000,panelClass: ["snack-notification"],horizontalPosition: "center",verticalPosition: "top",
+                });
+
+                this.isLoading.set(false);
+              },
+              error: (err) => {
+                Swal.fire('Error', err.message, 'error');
+                this.isLoading.set(false);
+              }
             });
-
-            this.isLoading.set(false);
-          });
+        } else {
+          throw {message: `Error ${this.listErrors[2].id}, seccion Refrendo. Repórtelo al CAT`, code: `${this.listErrors[2].id}`}
+        }
       }).catch(err =>{
-
+        Swal.fire('Error', err.message, 'error');
       });
 
   }

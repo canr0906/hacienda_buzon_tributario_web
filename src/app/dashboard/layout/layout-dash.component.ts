@@ -81,7 +81,6 @@ export class LayoutDashComponent implements OnDestroy {
 
   /* RECIBE UN OBJETO DE LA DEPENDENCIA SELECIONADA DEL COMPONENTE SERVICE-MENU.COMPONENT Y LO TRANSMITE A SIDENAV.COMPONENT */
   reciveValCard(valCard: DataConceptsStruct[]){
-    console.log(valCard)
     this.valCardSubjectEmitt.next(valCard);
     this.senNameDep.set(valCard[0].titulo);
   }
@@ -101,7 +100,7 @@ export class LayoutDashComponent implements OnDestroy {
 
     localStorage.removeItem('hbtw_general');
     const currentRoute = this.router.url.split('/');
-    console.log(this.router.url.split('/').includes('portal-hacienda-servicios'));
+
     if(currentRoute[currentRoute.length-1].includes('portal-hacienda-servicios')) {
       this.router.navigate(['/dashboard/sevices-menu']);//['/pagos']);
       return;

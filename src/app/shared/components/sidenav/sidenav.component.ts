@@ -97,7 +97,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     */
     this.valDependenciaCard.subscribe(resp => {
       //this.processChangeOnView(resp[0].padreId);
-      console.log(resp)
       this.localStorageControl.hbtw_idParent = []
       this.activeIdParent(resp[0].pk, 0, resp[0].pk);
     });
@@ -113,13 +112,12 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   activeIdParent(padreId: number, idConcepto: number, id: number) {
-    console.log(this.localStorageControl.hbtw_idParent)
     if (!!this.localStorageControl.hbtw_idParent) {
       this.localStorageControl.hbtw_idParent.push({ padreId: padreId });
     } else {
       this.localStorageControl.hbtw_idParent = [{padreId:padreId}]
     }
-    console.log(this.localStorageControl.hbtw_idParent)
+
     new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
 
     this.buildMenu((idConcepto > 0) ? idConcepto : id);
@@ -136,7 +134,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.generalService.requestConceptos(padreId)
       .subscribe(conceptos => {
-        console.log(conceptos)
         if (conceptos !== undefined) {
           const result = conceptos.filter(resp => resp.rol == 0);
           if (result.length > 0) {
@@ -162,7 +159,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   backMenu() {
-    console.log(!!this.localStorageControl.hbtw_idParent);
     if (!!this.localStorageControl.hbtw_idParent) {
       this.localStorageControl.hbtw_contribuyente = {} as VehicleDataResponseStruct
       const idControl = this.localStorageControl.hbtw_idParent?.slice(-2)[0].padreId// idParent[idParent.length - 2].padreId;
