@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { OfficesResponseStruct } from '@dashboard/interfaces/smyt/offices-response-struct.interfaz';
 import { environments } from '@environments/environments';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 
 import OficinasTramite from '@dashboard/data/smyt/oficinas_tramite.json'
 import TipoVehiculo from '@dashboard/data/smyt/vehicle_type.json'
@@ -14,6 +14,7 @@ import { DataDecrypt } from '@shared/classes/data-decrypt';
 
 import ListErrors from '@shared/data/errors.json';
 import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
+import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +62,22 @@ export class SmytService {
         .then(response =>{
           if(!!response[0].VEHICULOS) {
             return response[0].VEHICULOS
+          } else {
+            throw {message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
+          }
+        });
+    } catch(err) {
+      throw err;
+    }
+  }
+
+  /* METODO ENCARGADO DE OBTENER LOS DATOS DE hbtw_general ALMACENADOS EN LOCALSTORAGE */
+  async getGeneralDataAsync(): Promise<StorageDataStruct> {
+    try {
+      return await new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
+        .then(response =>{
+          if(!!response) {
+            return response
           } else {
             throw {message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
           }
@@ -130,12 +147,25 @@ export class SmytService {
   }
 
   getCalculoPagos(datosTramite:VehicleDataRequestStruct): Observable<VehicleDataResponseStruct> {
+
     let headers = new HttpHeaders();
 
     headers = headers.set("Content-Type", "application/json")
       .set("Authorization", "Basic " + btoa(`${this.userServiceHacienda}:${this.passServiceHacienda}`));
 
-    return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/smyt/particular`,JSON.stringify(datosTramite),{headers});
+    return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/smyt/particular`,JSON.stringify(datosTramite),{headers})
+      .pipe(
+        tap(resp=> console.log(resp)),
+        map(resp => {
+          if(resp.data.conceptos.length>0) {
+            return resp;
+          }
+          throw {message:"EL TRÁMITE YA SE HA REALIZADO",error:"Unauthorized",statusCode:401};
+        }),
+        catchError(err => {
+          throw err;
+        })
+      );
   }
 
   public existsPlaca(placa: string, mssg: number, tramite: number, tipoVehiculo: string) {

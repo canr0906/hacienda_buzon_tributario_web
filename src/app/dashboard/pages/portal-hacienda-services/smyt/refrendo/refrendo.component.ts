@@ -20,6 +20,7 @@ import ListErrors from '@shared/data/errors.json';
 import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
 import { DataEncrypt } from '@shared/classes/data-encrypt';
 import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
+import { ValidateLogin } from '@shared/classes/validate-login';
 
 @Component({
   standalone: true,
@@ -65,46 +66,28 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
   private listErrors = ListErrors;
 
   ngOnInit(): void {
-    /* SI EXISTE TOKEN SE ASUME QUE ES UN USUARIO REGISTRADO */
-    //this.conceptTitle.set(localStorage.getItem('hbtw_concept_admin')!);
-    if(!!localStorage.getItem('hbtw_token')) {
-      /* METODO ASINCRONO QUE SESENCRIPTA DATOS DE USUARIO Y TOKEN */
-      this.authService.checkAuthStatusAsync()
-      .then(result => {
-        if(result) {
-          /* OBSERVABLE QUE RENUEVA EL TOKEN */
-          this.authService.checkAuthStatus()
-            .subscribe({
-              next:(resp) => {
-                if(resp) {
-                  this.isAuthenticated.set(true);
-                  /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
-                  this.getVehicleData(this.authService.getToken());
-                }
-              },
-              error: (message) => {
-                this.isLoading.set(false);
-                Swal.fire({
-                  icon: "error",
-                  title: "Error!!",
-                  text: message
-                }).then(()=>{
-                  this.authService.logout();
-                  this.router.navigateByUrl('/auth')
-                });
-              },
-              complete: () => {}
-            });
-        } else {
-          Swal.fire('Error', `Error ${this.listErrors[0].id}, seccion Refrendo. Repórtelo al CAT`, 'error');
+    /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
+    new ValidateLogin(this.authService).validateSession()
+      .then((resp:any)=> {
+        if(resp.success) {
+          this.isAuthenticated.set(true);
+          /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
+          this.getVehicleData(this.authService.getToken());
         }
       })
-      .catch(error=>{
-        Swal.fire('Error', error.message, 'error');
-      })
-
-      /**/
-    }
+      .catch(err=>{
+        console.log(err)
+        this.isLoading.set(false);
+        Swal.fire({
+          icon: "error",
+          title: `Error: ${err.statusCode}`,
+          text: `${err.message}. Repórtelo al CAT e intente mas tarde`
+        }).then(()=>{
+          this.authService.logout();
+          this.router.navigateByUrl('/auth')
+        });
+      });
+    /* FIN */
   }
 
   ngAfterContentInit(): void {

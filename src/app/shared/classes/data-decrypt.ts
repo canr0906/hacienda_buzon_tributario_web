@@ -15,7 +15,7 @@ export class DataDecrypt {
       const stringData = JSON.parse(datadecrypt.toString(CryptoJS.enc.Utf8));
       return stringData;
     } catch(error) {
-      throw {message: `Error ${this.listErrors[0].id}. Repórtelo al CAT`, code: `${this.listErrors[0].id}`}//new Error('No fue posible desencriptar la información favor de contactar al CAT');
+      throw {"message": `Error ${this.listErrors[0].id}, sección Desencriptación de Datos. Repórtelo al CAT`, "error": "Unauthorized", "statusCode": 401}
     }
   }
 

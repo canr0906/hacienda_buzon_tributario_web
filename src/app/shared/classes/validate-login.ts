@@ -1,6 +1,7 @@
 import { inject } from "@angular/core";
 import { AuthServiceService } from "@auth/services/auth-service.service";
 import ListErrors from '@shared/data/errors.json';
+import { lastValueFrom, throwError } from "rxjs";
 
 
 export class ValidateLogin {
@@ -19,9 +20,18 @@ export class ValidateLogin {
             console.log(result)
             if(result) {
               /* OBSERVABLE QUE RENUEVA EL TOKEN */
-              return this.sessionValidAndEncrypt();
+              return lastValueFrom( this.authService.checkAuthStatus() )
+                .then(resp => {
+                  if(resp) {
+                    return {message: "ok", success: true}
+                  }
+                  return {message: `Error ${this.listErrors[2]} seccion Validar Login. Repórtelo al CAT e intentelo mas tarde`, success: false}
+                }).catch(err =>{
+                  console.log(err)
+                  throw err
+                });
             } else {
-              throw {message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
+              throw {"message": `Error ${this.listErrors[1].id}. Repórtelo al CAT`, "error": "Unauthorized", "statusCode": `${this.listErrors[1].id}`} //{message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
             }
           })
           .catch(error=>{
@@ -38,21 +48,7 @@ export class ValidateLogin {
 
   sessionValidAndEncrypt() {
     let mss;
-     this.authService.checkAuthStatus()
-              .subscribe({
-                next:(resp) => {
-                  if(resp) {
-                    mss = {message: "Ok", success: true}
-                  } else {
-                    mss = {message: "FALSE", success: false}
-                  }
-                },
-                error: (message) => {
-                  mss = message
-                  throw message
-                },
-                complete: () => {}
-              });
+
               console.log(mss)
               return mss
   }

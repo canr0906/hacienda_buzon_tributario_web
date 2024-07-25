@@ -92,18 +92,8 @@ export class AuthServiceService {
           return false;
         }),
         catchError( err =>{
-          let message = '';
           return throwError( () => {
-            if(err.status==401) {
-              if(typeof err.error.message == 'object') {
-                Object.keys(err.error.message).map(key => message += err.error.message[key]);
-              } else {
-                message = err.error.message;
-              }
-            } else {
-              message = "Error 500, reportelo al CAT e intentelo mas tarde";
-            }
-            return message;
+            return {message:err.error.message,error:err.statusText,statusCode:err.status};
           });
         })
       )
