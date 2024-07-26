@@ -143,7 +143,18 @@ export class SmytService {
     headers = headers.set("Content-Type", "application/json")
       .set("Authorization", "Basic " + btoa(`${this.userServiceHacienda}:${this.passServiceHacienda}`));
 
-    return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/concepto/obtenerConcepto`,JSON.stringify(datosTramite),{headers});
+    return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/concepto/obtenerConcepto`,JSON.stringify(datosTramite),{headers})
+      .pipe(
+        map(resp => {
+          if(!!resp.data && resp.data.conceptos.length>0) {
+            return resp;
+          }
+          throw {message:resp.mensaje,error:"Unauthorized",statusCode:401};
+        }),
+        catchError(err => {
+          throw err;
+        })
+      );
   }
 
   getCalculoPagos(datosTramite:VehicleDataRequestStruct): Observable<VehicleDataResponseStruct> {

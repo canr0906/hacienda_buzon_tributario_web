@@ -4,7 +4,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 import {SegmentTextPipe} from '@dashboard/pipes/segment-text.pipe';
 import ListErrors from '@shared/data/errors.json';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, catchError, lastValueFrom, from } from 'rxjs';
 
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -24,6 +24,11 @@ import { AuthServiceService } from '@auth/services/auth-service.service';
 import Swal from 'sweetalert2';
 import { ValidateLogin } from '@shared/classes/validate-login';
 import { SmytService } from '@dashboard/services/smyt/smyt.service';
+import { ServiciosHaciendaPortalService } from '@dashboard/services/servicios-hacienda-portal.service';
+import { DataEncrypt } from '@shared/classes/data-encrypt';
+import { IsanCobros } from '@dashboard/interfaces/soap-data-struct.interfaz';
+import { estadoVehiculo } from '@dashboard/interfaces/soap-estado-vehiculo-struct.interfaz';
+import { ConvertXmlString } from '@dashboard/classes/convert-xml-string';
 
 
 @Component({
@@ -48,6 +53,12 @@ import { SmytService } from '@dashboard/services/smyt/smyt.service';
 })
 export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
 
+  /* Variables SOAP Actualizar o Borrar */
+  private asJson!: IsanCobros;
+  private asJsonEstadoVehiculo!: estadoVehiculo;
+  //private asJsonIsan!: IsanCobros;
+  private xmlSring: ConvertXmlString = new ConvertXmlString();
+
   /* CONTROLA EL NOMBRE DE LOS ATRIBUTOS DEL OBJETO OBTENIDO */
   public displayedColumns  = signal<string[]>(['descripcion', 'ejercicioFiscal', 'importe', 'cantidad', 'subtotal']);
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
@@ -56,11 +67,11 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   public total             = signal<number>(0);
   public tipoFormEdit      = signal<boolean>(false);
   public tipoFormEdit_hoja = signal<boolean>(false);
-  public isAuthenticated   = signal<boolean>(false);
+  private isAuthenticated   = signal<boolean>(false);
   public tipoform          = signal<number>(0);
   public idConcepto        = signal<number>(0);
   /* NOTA: SE ALAMACENAN LOS CONCEPTOS RECIBIDOS POR LA URL */
-    private arrConceptos   = signal<number[]>([]);
+  private arrConceptos     = signal<number[]>([]);
   /* VARIABLE QUE CONTROLA EL LOCALSTORAGE GENERAL */
   private localStorageControl: StorageDataStruct = {} as StorageDataStruct
   private listErrors                             = ListErrors;
@@ -71,6 +82,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   private authService          = inject(AuthServiceService);
   private fb                   = inject(FormBuilder)
   private smytService          = inject(SmytService);
+  private generalService       = inject(ServiciosHaciendaPortalService);
 
   /* INICIO: CONTROLA LA RESOLUCION DEL DISPOSITIVO EN EL QUE SE ESTA REALIZANDO LA CONSULTA */
   private destroyed = new Subject<void>();
@@ -99,30 +111,44 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
-
-    /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
-    new ValidateLogin(this.authService).validateSession()
+    /* INICIO: ESTA SECCION DESENCRIPTA DATOS PARA OPERARLOS DENTRO DEL COMPONENTE, EVALUAR SI SE PUEDE OBTIMIZAR YA QUE SE USA EN TODOS  */
+    new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
+    .then(resp => {
+      this.localStorageControl = resp;
+      /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
+      new ValidateLogin(this.authService).validateSession()
       .then((resp:any)=> {
-        console.log(resp)
-        this.getCalculoPago(this.authService.getToken());
-        /*if(resp.success) {
+        if(resp.success) {
           this.isAuthenticated.set(true);
-          this.getCalculoPago(this.authService.getToken());
-        } else { }*/
+        }
+        this.getCalculoPago(this.authService.getToken());
       })
       .catch(err=>{
-        console.log(err)
         this.isLoading.set(false);
         Swal.fire({
           icon: "error",
           title: `Error: ${err.statusCode}`,
-          text: `${err.message}. Repórtelo al CAT e intente mas tarde`
+          text: `${err.message}`
         }).then(()=>{
           this.authService.logout();
           this.router.navigateByUrl('/auth')
         });
       })
+      /* FIN */
+    })
+    .catch(err=>{
+      this.isLoading.set(false);
+      Swal.fire({
+        icon: "error",
+        title: `Error: ${err.statusCode}`,
+        text: `${err.message}`
+      }).then(()=>{
+        this.authService.logout();
+        this.router.navigateByUrl('/auth')
+      });
+    })
     /* FIN */
+
   }
 
   ngOnDestroy(): void {
@@ -142,8 +168,23 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                 if (result.success && result.data.conceptos.length > 0) {
                   this.conceptos = result.data.conceptos;
                   this.total.set(this.total() + result.data.total);
+                  this.localStorageControl.hbtw_contribuyente = result;
+                  new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+                      .then(response=> {
+                        if(!!response) {
+                          return;
+                        }else{
+                          throw {message:"No fue posible guardar la información de manera local",error:"Unauthorized",statusCode:412};
+                        }
+                      })
+                      .catch(err=>{
+                        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                        .then(()=>{
+                          this.authService.logout();
+                          this.router.navigateByUrl('/auth')
+                        });
+                      });
 
-                  localStorage.setItem('contribuyente_admin', JSON.stringify(result));
                   return;
                 }
                 Swal.fire({icon: "error", title: 'Error !!', text: 'EL TRÁMITE YA SE HA REALIZADO'})
@@ -164,7 +205,8 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
           this.activatedRoute.params.subscribe(({ idConcepto, tipoForm }) => {
             this.tipoform.set(tipoForm);
             this.idConcepto.set(idConcepto);
-            this.arrConceptos.update(() => [...this.arrConceptos(), idConcepto]);// set(idConcepto);
+            //this.arrConceptos.update(() => [...this.arrConceptos(), idConcepto]);
+            this.arrConceptos.update(values => [...values, idConcepto]);
             const datos = JSON.parse(localStorage.getItem('datos_cobro_admin')!);
             switch (Number(this.tipoform)) {
               case 0: case 1: case 7:
@@ -265,12 +307,148 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
       });*/
   }
 
-  datosContribuyente(): void { }
+  datosContribuyente(): void {
+    if(this.isAuthenticated()) {
+      Swal.fire({
+        icon: "question",
+        title: "Datos de la Póliza !!!",
+        text: "Deseas que la poliza se genere con la información almacenado ?",
+        showCancelButton: true,
+        confirmButtonText: "Si",
+        cancelButtonText: "No"
+      }).then((result)=>{
+        if(result.isConfirmed) {
+          this.router.navigate(['dashboard/generar_poliza']);
+        } else {
+          console.log("DATOS_CONTRIBUYENTE")
+          //this.router.navigate(['pagos/datos-contribuyente']);
+        }
+      });
+      return;
+    }
+    console.log("DATOS_CONTRIBUYENTE_2")
+    //this.router.navigate(['pagos/datos-contribuyente']);
+  }
 
-  consultConceptoPago(idConcepto: number, cantidad: number, monto?: number) {}
+  consultConceptoPago(idConcepto: number, cantidad: number, monto?: number) {
+    monto = (monto == 0) ? 1 : monto;
+    //Si esta definido el Local-Stor, y dependiendo de los conceptos se agregan los elementos al form
+    if (!!this.localStorageControl.hbtw_contribuyente && (this.tipoFormEdit() || this.tipoFormEdit_hoja())) {
+      Object.keys(this.localStorageControl.hbtw_contribuyente.data.conceptos).forEach((k, v) => {
+        this.onAddElementForm();
+      });
+    } else {
+      this.onAddElementForm();
+    }
+
+
+    this.isLoading.set(true);
+    const datos = {
+      "idConcepto": idConcepto,
+      "monto": (monto) ? monto : null,
+      "cantidad": cantidad
+    };
+
+    this.smytService.otherCalculoPagos(datos)
+      .subscribe({
+        next: (resp) => {
+          this.isLoading.set(false);
+          if (resp.success && resp.data.conceptos.length > 0) {
+            if (!!this.localStorageControl.hbtw_contribuyente){
+              this.localStorageControl.hbtw_contribuyente!.data.conceptos.push(resp.data.conceptos[0]);
+              this.localStorageControl.hbtw_contribuyente!.data.total = resp.data.total;
+              this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle + resp.data.lineaDetalle;
+
+              new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+                .then(response => {
+                  if(!response) {
+                    throw {message:"No fue posible guardar la información de manera local",error:"Unauthorized",statusCode:412};
+                  }
+                })
+                .catch(err=>{
+                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                  .then(()=>{
+                    this.authService.logout();
+                    this.router.navigateByUrl('/auth')
+                  });
+                });
+              if (this.total() === 0) {
+                this.total.set(this.localStorageControl.hbtw_contribuyente!.data.total);
+                return;
+              }
+              this.total.set(this.localStorageControl.hbtw_contribuyente!.data.total + resp.data.total);
+              return;
+            }
+            //this.conceptos = resp.data.conceptos;
+            //localStorage.setItem('contribuyente_admin', JSON.stringify(resp));//this.conceptoPago));
+            this.localStorageControl.hbtw_contribuyente = resp;
+            new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+                .then(response=> {
+                  if(!!response) {
+                    this.total.set( this.total() + resp.data.total);
+                    /*if (this.generalService.conceptoStorage.filter(resp => resp.idConcepto === Number(idConcepto) && resp.combinable == 1).length > 0) {
+                      setTimeout(() => {
+                        this.openSnackBar('Para agregagar otro concepto, seleccionelo en el menu lateral');
+                      }, 3000)
+                    }*/
+                    return;
+                  }else{
+                    throw {message:"No fue posible guardar la información de manera local",error:"Unauthorized",statusCode:412};
+                  }
+                })
+                .catch(err=>{
+                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                  .then(()=>{
+                    this.authService.logout();
+                    this.router.navigateByUrl('/auth')
+                  });
+                });
+          }
+          //this.openSnackBar(resp.mensaje!);//'EL TRÁMITE YA SE HA REALIZADO');
+          setTimeout(() => {
+            this.router.navigate(['pagos']);
+          }, 2000)
+        },
+        error: (err) =>{
+          Swal.fire('Error', err.message, 'error');
+          this.isLoading.set(false);
+        }
+      });
+  }
+
+  onAddElementForm() {
+    if (this.newElementForm.invalid) return;
+    const newGame = this.newElementForm.value
+    this.cantidadPago.push(
+      this.fb.control(newGame)
+    );
+
+  }
 
   /** SOAP Actualizar */
-  consultConceptoPagoISAN(idConcepto: number) {}
+  consultConceptoPagoISAN(idConcepto: number) {
+
+    //const datos = JSON.parse(localStorage.getItem('datos_cobro')!);
+    this.generalService.getDetalleCobroISAN(this.localStorageControl.hbtw_datos_cobro?.monto!, String(this.localStorageControl.hbtw_datos_cobro?.fechaVencimiento),927)
+      .then(response => response.text())
+      .then(xml => {
+        this.isLoading.set(false);
+        this.asJson = this.xmlSring.xmlStringToJson(xml.toString());
+        let adeudos = this.asJson['soap:Envelope']['soap:Body']['ns2:obtenerRezagosActualizacionAdicionalesResponse'].adeudos;
+        this.conceptos = [{
+          id: 0,
+          clave: String(adeudos['claveConcepto']['#text']),
+          cantidad: 1,
+          descripcion: String(adeudos['descripcion']['#text']),
+          ejercicioFiscal: Number(adeudos['ejercicioFiscal']['#text']),
+          importe: Number(adeudos['importe']['#text'])
+        }];
+        localStorage.setItem('contribuyente', JSON.stringify({ data: { total: Number(adeudos['total']['#text']), conceptos: this.conceptos, lineaDetalle: String(adeudos['lineaDetalle']['#text']) }, success: true }));//this.conceptoPago));
+        this.total.set(this.total() + Number(adeudos['total']['#text']));
+      }).catch(err => console.log(err));
+
+
+  }
 
   sendCant(val: any): void {}
 

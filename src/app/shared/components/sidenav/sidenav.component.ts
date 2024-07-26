@@ -20,6 +20,7 @@ import { VehicleDataRequestStruct } from '@dashboard/interfaces/smyt/vehicle-dat
 import { PolizaDataResponse } from '@dashboard/interfaces/smyt/poliza-data-response.interfaz';
 import { DataDecrypt } from '@shared/classes/data-decrypt';
 import { DataEncrypt } from '@shared/classes/data-encrypt';
+import { DataServiceGeneralRequest } from '@dashboard/interfaces/data-service-general-request.interfaz';
 
 
 @Component({
@@ -224,7 +225,7 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!!this.localStorageControl.hbtw_datos_poliza)
       this.localStorageControl.hbtw_datos_poliza = {} as PolizaDataResponse;
     if (!!this.localStorageControl.hbtw_datos_cobro)
-      this.localStorageControl.hbtw_datos_cobro = "";
+      this.localStorageControl.hbtw_datos_cobro = {} as DataServiceGeneralRequest;
 
     new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general');
 

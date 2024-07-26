@@ -50,6 +50,11 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/components/tabla-calculo-conceptos/tabla-calculo-conceptos.component').then(c =>c.TablaCalculoConceptosComponent),
       },
       {
+        path: 'generar_poliza',
+        title: 'Generar Póliza',
+        loadComponent: () => import('./dashboard/components/datos-poliza/datos-poliza.component').then(c => c.DatosPolizaComponent)
+      },
+      {
         path: '',
         redirectTo: 'dashboard/sevices-menu',
         pathMatch: 'full'

@@ -15,7 +15,8 @@ export class DataEncrypt {
       localStorage.setItem(nameLocal,dataencrypt);
       return true;
     } catch(error) {
-      throw new Error('No fue posible almacenar la información de manera local, favor de contactar al CAT e intentarlo nuevmanete ');
+      //throw new Error('No fue posible almacenar la información de manera local, favor de contactar al CAT e intentarlo nuevmanete ');
+      throw {"message": `Error 412, No fue posible almacenar la información de manera local`, "error": "Unauthorized", "statusCode": 412}
     }
   }
 

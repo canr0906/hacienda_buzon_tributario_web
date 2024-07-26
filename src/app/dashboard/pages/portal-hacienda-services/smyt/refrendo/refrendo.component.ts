@@ -21,6 +21,7 @@ import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.inte
 import { DataEncrypt } from '@shared/classes/data-encrypt';
 import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
 import { ValidateLogin } from '@shared/classes/validate-login';
+import { VehicleDataRequestStruct } from '@dashboard/interfaces/smyt/vehicle-data-request-struct';
 
 @Component({
   standalone: true,
@@ -54,6 +55,8 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
 
   public signalTrue = signal<boolean>(true);
   public signalFalse = signal<boolean>(false);
+  /* VARIABLE QUE CONTROLA EL LOCALSTORAGE GENERAL */
+  private localStorageControl: StorageDataStruct = {} as StorageDataStruct
 
   public isAuthenticated = signal<boolean>(false);
 
@@ -66,28 +69,45 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
   private listErrors = ListErrors;
 
   ngOnInit(): void {
-    /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
-    new ValidateLogin(this.authService).validateSession()
-      .then((resp:any)=> {
-        if(resp.success) {
-          this.isAuthenticated.set(true);
-          /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
-          this.getVehicleData(this.authService.getToken());
-        }
+    /* INICIO: ESTA SECCION DESENCRIPTA DATOS PARA OPERARLOS DENTRO DEL COMPONENTE, EVALUAR SI SE PUEDE OBTIMIZAR YA QUE SE USA EN TODOS  */
+    new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
+      .then(resp => {
+        this.localStorageControl = resp;
+        /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
+        new ValidateLogin(this.authService).validateSession()
+        .then((resp:any)=> {
+          if(resp.success) {
+            this.isAuthenticated.set(true);
+            /* METODO INTERNO PARA OBTENER DATOS DEL VEHICULO */
+            this.getVehicleData(this.authService.getToken());
+          }
+        })
+        .catch(err=>{
+          console.log(err)
+          this.isLoading.set(false);
+          Swal.fire({
+            icon: "error",
+            title: `Error: ${err.statusCode}`,
+            text: `${err.message}. Repórtelo al CAT e intente mas tarde`
+          }).then(()=>{
+            this.authService.logout();
+            this.router.navigateByUrl('/auth')
+          });
+        });
+        /* FIN */
       })
       .catch(err=>{
-        console.log(err)
         this.isLoading.set(false);
         Swal.fire({
           icon: "error",
           title: `Error: ${err.statusCode}`,
-          text: `${err.message}. Repórtelo al CAT e intente mas tarde`
+          text: `${err.message}`
         }).then(()=>{
           this.authService.logout();
           this.router.navigateByUrl('/auth')
         });
       });
-    /* FIN */
+      /* FIN */
   }
 
   ngAfterContentInit(): void {
@@ -133,18 +153,19 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
       this.isLoading.set(false);
       return;
     }
-    let reqData: StorageDataStruct = {} as StorageDataStruct;
+    let reqData: VehicleDataRequestStruct = {} as VehicleDataRequestStruct;
 
-    reqData.hbtw_vehicle_data = {
-      placa:this.myForm.get('primary_form')?.get('placa')?.value,
-      tramite:1,
-      obtenerContribuyente:this.isAuthenticated()?false:true
-    };
+    reqData.placa = this.myForm.get('primary_form')?.get('placa')?.value;
+    reqData.tramite=1;
+    reqData.obtenerContribuyente = this.isAuthenticated()?false:true
 
-    new DataEncrypt(reqData).dataEncript('hbtw_general')
+
+    this.localStorageControl.hbtw_vehicle_data = reqData;
+
+    new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
       .then(resp => {
         if(!!resp && resp) {
-          this.smytService.validateVehicle(reqData.hbtw_vehicle_data!)
+          this.smytService.validateVehicle(reqData)
             .subscribe({
               next:(resp) => {
                 if (resp?.success) {

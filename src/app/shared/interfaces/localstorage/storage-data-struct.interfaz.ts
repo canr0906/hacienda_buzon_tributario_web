@@ -2,6 +2,7 @@ import { VehicleDataRequestStruct } from "@dashboard/interfaces/smyt/vehicle-dat
 import { StorageDataParentStruct } from "./storage-data-parent-struct.interfaz";
 import { VehicleDataResponseStruct } from "@dashboard/interfaces/smyt/vehicle-data-response-struct";
 import {PolizaDataResponse} from "@dashboard/interfaces/smyt/poliza-data-response.interfaz"
+import { DataServiceGeneralRequest } from "@dashboard/interfaces/data-service-general-request.interfaz";
 
 export interface StorageDataStruct {
   hbtw_idParent?: StorageDataParentStruct[];
@@ -14,5 +15,5 @@ export interface StorageDataStruct {
 
   hbtw_contribuyente_only?: string;
   hbtw_vehicle_data_adicional?: string;
-  hbtw_datos_cobro?: string;
+  hbtw_datos_cobro?: DataServiceGeneralRequest;
 }
