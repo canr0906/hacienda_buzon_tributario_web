@@ -51,6 +51,7 @@ export class ServicesMenuComponent implements OnInit {
           Swal.fire('Error', "Para tener acceso a este modulo necesita generar un registro", 'error');
           return;
         }
+        this.router.navigate(['dashboard/buzon_contribuyente/messageslist/',1,1,1,'TEST731111ME2'])
         break;
       case 'portal-hacienda-servicios':
         this.router.navigate(['/dashboard/'+id]);

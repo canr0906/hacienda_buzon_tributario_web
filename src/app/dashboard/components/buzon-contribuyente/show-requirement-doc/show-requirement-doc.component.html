@@ -1,0 +1,23 @@
+@if (statusShowDoc()) {
+  <load-spinner/>
+}
+<div style="padding: 3px;">
+  <div class="align-items-center justify-content-center"  height="100%">
+    <mat-card class="shadow-5 m-3 border-round-sm">
+      <mat-card-header>
+        <mat-card-subtitle>
+          <button mat-icon-button aria-label="Example icon button with a vertical three dot icon" matTooltip="close and mark as read" (click)="eventAttended()" [disabled]="lockButton()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <br>
+      <mat-card-content>
+        <object id="ifrm" type="application/pdf" width="100%" [height]="(sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall')?'580px':'500px'"
+        scrolling="No" frameborder="0"
+        class="col-lg-12 col-md-12 col-sm-12 col-xs-12"></object>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

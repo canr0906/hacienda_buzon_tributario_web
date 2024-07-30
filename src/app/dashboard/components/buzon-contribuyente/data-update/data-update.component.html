@@ -1,0 +1,212 @@
+<div style="padding: 3px;">
+  <button mat-icon-button style="display: table-cell; max-width: 600px;" aria-label="Example icon button with a vertical three dot icon" matTooltip="close and mark as read" (click)="eventAttended()" >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <div class="flex flex-wrap align-items-center justify-content-center">
+    @if (statusSendVerifyCode()) {
+      <load-spinner/>
+    }
+    <mat-card class="" >
+      <mat-card-header>
+        <mat-card-title>Actualizacion de datos</mat-card-title>
+        <mat-card-subtitle>
+          Datos para notificar
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <br>
+      <mat-card-content>
+
+          <mat-tab-group>
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon class="example-tab-icon">mail</mat-icon>
+                Cuentas de correo
+              </ng-template>
+                <div class="shadow-4 m-3 surface-card p-3 border-round-sm ">
+                  <form [formGroup]="myForm">
+                      <div style="padding: 20px;">
+                        <mat-form-field style="margin-right:0.5em;" appearance="outline">
+                          <mat-label>Cuenta de correo:</mat-label>
+                          <input matInput placeholder="Cuenta de Correo..." formControlName="email">
+                          <mat-error>{{getMessage(myForm.get('email')?.errors,'email')}}</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Tipo de contacto:</mat-label>
+                          <mat-select formControlName="tipoContacto">
+                            <mat-option value="1">PRINCIPAL</mat-option>
+                            <mat-option value="2">ALTERNATIVO</mat-option>
+                            <mat-option value="3">OFICINA</mat-option>
+                          </mat-select>
+                          <mat-error>{{getMessage(myForm.get('tipoContacto')?.errors,'tipoContacto')}}</mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div style="padding-left: 20px;">
+                        <div class="flex justify-content-between flex-wrap">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Código de verificacion:</mat-label>
+                            <input matInput placeholder="Codigo de Verificacion..." formControlName="codigoVerif">
+                            <button mat-icon-button matSuffix (click)="sendVerifyCode()" matTooltip="enviar por correo código">
+                              <mat-icon matSuffix>outgoing_mail</mat-icon>
+                            </button>
+                            <mat-error>{{getMessage(myForm.get('codigoVerif')?.errors,'codigoVerif')}}</mat-error>
+                          </mat-form-field>
+                          <div class="flex align-items-center justify-content-center w-4rem h-4rem bg-primary font-bold border-round m-2">
+                          <button mat-fab color="primary"  matTooltip="Agregar correo a la tabla" color="primary" (click)="addEmail()">
+                            <mat-icon color="with">archive</mat-icon>
+                          </button>
+                          </div>
+                        </div>
+                      </div>
+                  </form>
+                </div>
+                <br>
+                <div class="">
+                  <div class="shadow-4 m-3 surface-card p-3 border-round-sm ">
+                    <table mat-table #mattableemail [dataSource]="dataSource" matSort>
+                      <!-- Email Column -->
+                      <ng-container matColumnDef="direccion_correo">
+                        <th mat-header-cell *matHeaderCellDef> Cuenta de correo </th>
+                        <td mat-cell *matCellDef="let element"> {{element.direccion_correo}} </td>
+                      </ng-container>
+                      <!-- Name Column -->
+                      <ng-container matColumnDef="tipo_contacto">
+                        <th mat-header-cell *matHeaderCellDef> Típo </th>
+                        <td mat-cell *matCellDef="let element"> {{element.tipo_contacto}} </td>
+                      </ng-container>
+                      <!-- Weight Column -->
+                      <ng-container matColumnDef="accion">
+                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                        <td mat-cell *matCellDef="let row" >
+                          <button mat-mini-fab color="primary" (click)="garbageColect(row.direccion_correo)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                    @if (dataSource.length <= 0) {
+                    <div class="flex justify-content-center flex-wrap">
+                      <ng-container >
+                        <p>There is no data for show</p>
+                      </ng-container>
+                    </div>
+                    }
+                  </div>
+                </div>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon class="example-tab-icon">phone_iphone</mat-icon>
+                No de teléfono
+              </ng-template>
+                <div class="shadow-4 m-3 surface-card p-3 border-round-sm ">
+                  <form [formGroup]="myFormPhone">
+                    <div style="padding: 20px;">
+                      <mat-form-field style="margin-right:0.5em;" appearance="outline">
+                        <mat-label>No de teléfono:</mat-label>
+                        <input matInput placeholder="Placeholder" formControlName="noPhone">
+                        <mat-hint>Ej: (777) 1234567</mat-hint>
+                        <mat-error>{{getMessage(myFormPhone.get('noPhone')?.errors,'noPhone')}}</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Tipo de contacto:</mat-label>
+                        <mat-select formControlName="tipoContactoP">
+                          <mat-option value="1">PRINCIPAL</mat-option>
+                          <mat-option value="2">ALTERNATIVO</mat-option>
+                          <mat-option value="3">OFICINA</mat-option>
+                        </mat-select>
+                        <mat-error>{{getMessage(myFormPhone.get('tipoContactoP')?.errors,'tipoContactoP')}}</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div style="padding-left: 20px;">
+                      <mat-form-field style="margin-right:0.5em;" appearance="outline">
+                        <mat-label>Típo de número:</mat-label>
+                        <mat-select formControlName="tipoPhone">
+                          <mat-option value="1">FIJO</mat-option>
+                          <mat-option value="2">MOVIL</mat-option>
+                        </mat-select>
+                        <mat-error>{{getMessage(myFormPhone.get('tipoPhone')?.errors,'tipoPhone')}}</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Extensión</mat-label>
+                        <input matInput placeholder="Placeholder" formControlName="extension">
+                        <mat-error>{{getMessage(myFormPhone.get('extension')?.errors,'extension')}}</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div style="padding-left: 20px;">
+                      <div class="flex justify-content-between flex-wrap">
+                        <div class="flex align-items-center justify-content-center w-4rem h-4rem bg-primary font-bold border-round m-2">
+                          <button mat-fab color="primary"  matTooltip="Agregar el teléfono a la tabla" color="primary" (click)="addPhone()">
+                            <mat-icon color="with">archive</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <br>
+                <div class="">
+                  <div class="shadow-4 m-3 surface-card p-3 border-round-sm ">
+                    <table mat-table #mattablephone [dataSource]="dataSourcePhone" matSort>
+
+                      <ng-container matColumnDef="no_telefonico">
+                        <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+                        <td mat-cell *matCellDef="let dataPhone"> {{dataPhone.no_telefonico}} </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="tipo_contacto">
+                        <th mat-header-cell *matHeaderCellDef> Típo Contacto </th>
+                        <td mat-cell *matCellDef="let dataPhone"> {{dataPhone.tipo_contacto}} </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="tipo">
+                        <th mat-header-cell *matHeaderCellDef> Típo Teléfono </th>
+                        <td mat-cell *matCellDef="let dataPhone"> {{dataPhone.tipo}} </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="extension">
+                        <th mat-header-cell *matHeaderCellDef> Extensión </th>
+                        <td mat-cell *matCellDef="let dataPhone"> {{dataPhone.extension}} </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="accion">
+                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                        <td mat-cell *matCellDef="let dataPhone" >
+                          <button mat-mini-fab color="primary" (click)="garbageColect(dataPhone.no_telefonico, 'dataSourcePhone')">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="displayedColumnsPhone"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumnsPhone;"></tr>
+                    </table>
+                    @if (dataSourcePhone.length <= 0) {
+                    <div class="flex justify-content-center flex-wrap">
+                      <ng-container >
+                        <p>There is no data for show</p>
+                      </ng-container>
+                    </div>
+                    }
+                  </div>
+                </div>
+            </mat-tab>
+          </mat-tab-group>
+
+
+      </mat-card-content>
+      <br>
+      <mat-divider></mat-divider>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" matTooltip="Actualizar información" (click)="saveDataUser()">
+          <mat-icon color="with">system_update_alt</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+  <br>
+</div>
+

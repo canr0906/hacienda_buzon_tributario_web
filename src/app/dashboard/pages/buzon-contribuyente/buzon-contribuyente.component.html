@@ -1,0 +1,14 @@
+<mat-sidenav-container class="example-container" >
+  <mat-sidenav #drawer position="end" mode="over" style="width: 80%; height: 100%; z-index:101; position: absolute; background: linear-gradient(white, gray);" disableClose>
+    @if (this.prioridad()==1) {
+      <buzon-data-update (flagAttendedUpdate)="eventAttendedDataUpdate()" [priorida]="prioridad" [curp]="curp" [pkAviso]="pkAviso" [rfc]="rfc" [sistema]="sistema" [tIdent]="tIdent"/>
+    }@else if (this.prioridad()==2) {
+      <buzon-show-requirement-doc (flagAttended)="eventAttended($event)" [messageAtended]="messageAtended"/>
+    }@else if(this.prioridad()==0) {
+      <buzon-know-message  [message]="message" [messageAtended]="messageAtended" (flagAttended)="eventAttended($event)"/>
+    }
+  </mat-sidenav>
+  <mat-sidenav-content style="height: 100%;">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,28 @@
+<div style="padding: 3px;">
+  <div class="flex flex-wrap align-items-center justify-content-center">
+
+    <mat-card class="example-card shadow-5 m-3 surface-card border-round-sm font-semibold">
+      <mat-card-header>
+        <mat-card-title>Mensaje de Conocimiento</mat-card-title>
+        <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <br>
+      <mat-card-content>
+        <p class="list-none p-0 m-0 overflow-hidden">{{message}}</p>
+      </mat-card-content>
+      <br>
+      <mat-divider></mat-divider>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="eventAttended()">
+          <mat-icon color="with">
+            @if (messageAtended==1) {
+              mark_email_unread
+            } @else {
+              check
+            }
+          </mat-icon> @if (messageAtended==0) { Leído }</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

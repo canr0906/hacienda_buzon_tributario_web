@@ -60,6 +60,23 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/components/datos-poliza/datos-poliza.component').then(c => c.DatosPolizaComponent)
       },
       {
+        path: 'buzon_contribuyente',
+        title: 'Buzón Contribuyente',
+        loadComponent: () => import('./dashboard/pages/buzon-contribuyente/buzon-contribuyente.component').then(c => c.BuzonContribuyenteComponent),
+        children: [
+          {
+            path: 'messageslist/:sistema/:tipoIdent/:incGeneral/:credential',
+            title: 'Lista de Mensajes',
+            loadComponent: () => import('./dashboard/pages/buzon-contribuyente/messages-list/messages-list.component').then(c => c.MessagesListComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'dashboard/buzon_contribuyente',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
         path: '',
         redirectTo: 'dashboard/sevices-menu',
         pathMatch: 'full'
