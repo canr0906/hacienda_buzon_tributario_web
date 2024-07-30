@@ -111,6 +111,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
+    this.isLoading.set(true);
     /* INICIO: ESTA SECCION DESENCRIPTA DATOS PARA OPERARLOS DENTRO DEL COMPONENTE, EVALUAR SI SE PUEDE OBTIMIZAR YA QUE SE USA EN TODOS  */
     new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
     .then(resp => {
@@ -125,27 +126,21 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
       })
       .catch(err=>{
         this.isLoading.set(false);
-        Swal.fire({
-          icon: "error",
-          title: `Error: ${err.statusCode}`,
-          text: `${err.message}`
-        }).then(()=>{
-          this.authService.logout();
-          this.router.navigateByUrl('/auth')
-        });
+        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+          .then(()=>{
+            this.authService.logout();
+            this.router.navigateByUrl('/auth')
+          });
       })
       /* FIN */
     })
     .catch(err=>{
       this.isLoading.set(false);
-      Swal.fire({
-        icon: "error",
-        title: `Error: ${err.statusCode}`,
-        text: `${err.message}`
-      }).then(()=>{
-        this.authService.logout();
-        this.router.navigateByUrl('/auth')
-      });
+      Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+        .then(()=>{
+          this.authService.logout();
+          this.router.navigateByUrl('/auth')
+        });
     })
     /* FIN */
 
@@ -178,7 +173,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                         }
                       })
                       .catch(err=>{
-                        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
                         .then(()=>{
                           this.authService.logout();
                           this.router.navigateByUrl('/auth')
@@ -187,13 +182,13 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
 
                   return;
                 }
-                Swal.fire({icon: "error", title: 'Error !!', text: 'EL TRÁMITE YA SE HA REALIZADO'})
+                Swal.fire({icon: "error", title: 'Error !!', text: 'EL TRÁMITE YA SE HA REALIZADO', allowOutsideClick:false})
                   .then(() => {
                     this.router.navigate(['dashboard']);
                   });
               },
               error: (error) => {
-                 Swal.fire({icon: "error", title: `Error: ${error.statusCode}`, text: error.message})
+                 Swal.fire({icon: "error", title: `Error: ${error.statusCode}`, text: error.message, allowOutsideClick:false})
                  .then(() => {
                     this.router.navigate(['dashboard/portal-hacienda-servicios']);
                   });
@@ -277,7 +272,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
         }
       })
       .catch(err =>{
-        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
           .then(()=>{
             this.authService.logout();
             this.router.navigateByUrl('/auth')
@@ -309,25 +304,18 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
 
   datosContribuyente(): void {
     if(this.isAuthenticated()) {
-      Swal.fire({
-        icon: "question",
-        title: "Datos de la Póliza !!!",
-        text: "Deseas que la poliza se genere con la información almacenado ?",
-        showCancelButton: true,
-        confirmButtonText: "Si",
-        cancelButtonText: "No"
-      }).then((result)=>{
-        if(result.isConfirmed) {
-          this.router.navigate(['dashboard/generar_poliza']);
-        } else {
-          console.log("DATOS_CONTRIBUYENTE")
-          //this.router.navigate(['pagos/datos-contribuyente']);
-        }
-      });
+      Swal.fire({icon: "question", title: "Datos de la Póliza !!!", text: "Deseas que la poliza se genere con la información almacenado ?", showCancelButton: true, confirmButtonText: "Si", cancelButtonText: "No", allowOutsideClick:false})
+        .then((result)=>{
+          if(result.isConfirmed) {
+            this.router.navigate(['dashboard/generar_poliza']);
+          } else {
+            this.router.navigate(['dashboard/datos-contribuyente']);
+          }
+        });
       return;
+    }else{
+      this.router.navigate(['dashboard/datos-contribuyente']);
     }
-    console.log("DATOS_CONTRIBUYENTE_2")
-    //this.router.navigate(['pagos/datos-contribuyente']);
   }
 
   consultConceptoPago(idConcepto: number, cantidad: number, monto?: number) {
@@ -366,7 +354,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                   }
                 })
                 .catch(err=>{
-                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
                   .then(()=>{
                     this.authService.logout();
                     this.router.navigateByUrl('/auth')
@@ -397,7 +385,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                   }
                 })
                 .catch(err=>{
-                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`})
+                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
                   .then(()=>{
                     this.authService.logout();
                     this.router.navigateByUrl('/auth')
@@ -410,7 +398,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
           }, 2000)
         },
         error: (err) =>{
-          Swal.fire('Error', err.message, 'error');
+          Swal.fire({icon: "error", title: `Error !!`, text: `${err.message}.`, allowOutsideClick:false});
           this.isLoading.set(false);
         }
       });

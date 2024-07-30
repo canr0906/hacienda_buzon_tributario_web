@@ -1,9 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { PolicyData } from '@dashboard/interfaces/policyDataRequest.interfaz';
+import { PolizaDataResponse } from '@dashboard/interfaces/smyt/poliza-data-response.interfaz';
 import { environments } from '@environments/environments';
 import { EntidadesRequestStruct } from '@shared/interfaces/entidades-request-struct.interfaz';
 import { MunicipiosResponseStruct } from '@shared/interfaces/municipios-response-struct.interfaz';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, pipe, tap, throwError } from 'rxjs';
+import ListErrors from '@shared/data/errors.json';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +35,21 @@ export class GeneralService {
 
     return this.http.post<MunicipiosResponseStruct>(`${this.baseUrlServHacienda}serviciosHacienda/combo/obtenerListaMunicipios`,JSON.stringify(body),{headers})
       .pipe(
-        catchError(error => of(null))
+        catchError(err => {
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = ListErrors[6].type;
+            }
+            throw {message:message,error:"Unauthorized",statusCode:ListErrors[6].id};
+          });
+        })
       );
   }
 
@@ -45,7 +62,48 @@ export class GeneralService {
 
     return this.http.post<MunicipiosResponseStruct>(`${this.baseUrlServHacienda}serviciosHacienda/combo/obtenerEstados`,JSON.stringify(body),{headers})
       .pipe(
-        catchError(error => of(null))
+        catchError(err => {
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = ListErrors[5].type;
+            }
+            throw {message:message,error:"Unauthorized",statusCode:ListErrors[5].id};
+          });
+        })
+      );
+  }
+
+  generarPolizaServ(datosTramite:PolicyData): Observable<PolizaDataResponse> {
+    let headers = new HttpHeaders();
+
+    headers = headers.set("Content-Type", "application/json")
+      .set("Authorization", "Basic " + btoa(`${this.userServHacienda}:${this.passServHacienda}`));
+
+    return this.http.post<PolizaDataResponse>(`${this.baseUrlServHacienda}serviciosHacienda/poliza/generar`,JSON.stringify(datosTramite),{headers})
+      .pipe(
+        //TODO: Errores
+        catchError( err =>{
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = ListErrors[4].type;
+            }
+            throw {message:message,error:"Unauthorized",statusCode:ListErrors[4].id};
+          });
+        })
       );
   }
 

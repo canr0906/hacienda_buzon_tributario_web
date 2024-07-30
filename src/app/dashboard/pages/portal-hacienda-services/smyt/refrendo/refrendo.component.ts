@@ -83,29 +83,22 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
           }
         })
         .catch(err=>{
-          console.log(err)
           this.isLoading.set(false);
-          Swal.fire({
-            icon: "error",
-            title: `Error: ${err.statusCode}`,
-            text: `${err.message}. Repórtelo al CAT e intente mas tarde`
-          }).then(()=>{
-            this.authService.logout();
-            this.router.navigateByUrl('/auth')
-          });
+          Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}. Repórtelo al CAT e intente mas tarde`, allowOutsideClick:false})
+            .then(()=>{
+              this.authService.logout();
+              this.router.navigateByUrl('/auth')
+            });
         });
         /* FIN */
       })
       .catch(err=>{
         this.isLoading.set(false);
-        Swal.fire({
-          icon: "error",
-          title: `Error: ${err.statusCode}`,
-          text: `${err.message}`
-        }).then(()=>{
-          this.authService.logout();
-          this.router.navigateByUrl('/auth')
-        });
+        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+          .then(()=>{
+            this.authService.logout();
+            this.router.navigateByUrl('/auth')
+          });
       });
       /* FIN */
   }
@@ -133,17 +126,14 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
             },
             error: (message) => {
               this.isLoading.set(false);
-              Swal.fire({
-                icon: "error",
-                title: "Error!!",
-                text: message
-              }).then(()=>{});
+              Swal.fire({icon: "error", title: "Error!!", text: message, allowOutsideClick:false})
+                .then(()=>{});
             },
             complete: () => {}
           })
       })
-      .catch(error=>{
-        Swal.fire('Error', error.message, 'error');
+      .catch(err=>{
+        Swal.fire({icon: "error", title: "Error!!", text: err.message, allowOutsideClick:false});
       })
   }
 
@@ -180,7 +170,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
                 this.isLoading.set(false);
               },
               error: (err) => {
-                Swal.fire('Error', err.message, 'error');
+                Swal.fire({icon: "error", title: "Error!!", text: err.message, allowOutsideClick:false});
                 this.isLoading.set(false);
               }
             });
@@ -188,7 +178,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
           throw {message: `Error ${this.listErrors[2].id}, seccion Refrendo. Repórtelo al CAT`, code: `${this.listErrors[2].id}`}
         }
       }).catch(err =>{
-        Swal.fire('Error', err.message, 'error');
+        Swal.fire({icon: "error", title: "Error!!", text: err.message, allowOutsideClick:false});
       });
 
   }

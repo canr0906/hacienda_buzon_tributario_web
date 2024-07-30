@@ -19,7 +19,7 @@ import { VehicleUSerStruct } from '@auth/interfaces/register-user/vehicle-user-s
 import { TaxUSerStruct } from '@auth/interfaces/register-user/tax-user-struct.interfaz';
 import { ConcesionUSerStruct } from '@auth/interfaces/register-user/concesion-user-struct.interfaz';
 import Swal from 'sweetalert2';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 
@@ -27,6 +27,7 @@ import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner
   selector: 'app-register',
   standalone: true,
   imports: [
+    RouterModule,
     LoadSpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
@@ -96,8 +97,6 @@ export class RegisterComponent implements AfterViewInit {
       this.myFormReg.addControl('datos_pass',this.childComponentPass.formTaxPayPass);
       this.childComponentPass.formTaxPayPass.setParent(this.myFormReg);
     });
-
-    console.log(this.myFormReg)
   }
 
 
@@ -173,7 +172,6 @@ export class RegisterComponent implements AfterViewInit {
 
     /* DATOS DE CONTRIBUCIONES DEL USUARIO */
     if(!this.myFormReg.get('datos_contrib')?.pristine) {
-      console.log(this.myFormReg.get('datos_contrib'))
       let flag   = 0;
       let flag_v = 0;
       if(this.myFormReg.get('datos_contrib')?.get('smyt')?.get('licencia')?.value) {
@@ -221,7 +219,6 @@ export class RegisterComponent implements AfterViewInit {
     this.registerUserStruct.telefonosList = this.phoneUserStruct;
 
 
-    console.log(this.registerUserStruct);
     let message: string = '';
     this.authService.registerTaxPayer(this.registerUserStruct)
       .subscribe({
@@ -232,26 +229,17 @@ export class RegisterComponent implements AfterViewInit {
           } else{
             message = "Problemas en el Registro, contacte al CAT"
           }
-          Swal.fire(
-            {
-              icon: "success",
-              title: message,
-              showConfirmButton: false,
-              timer: 1500
-            }
-          ).then(()=>{ this.router.navigateByUrl('auth/login'); });
+          Swal.fire({icon: "success",title: message,showConfirmButton: false,timer: 1500, allowOutsideClick:false})
+            .then(()=>{ this.router.navigateByUrl('auth/login'); });
         },
         error: (error) => {
           this.isLoading.set(false);
-          Swal.fire({
-            title: "Error !!",
-            text: error,
-            icon: "error"
-          }).then((response) => {
-            if (response.isConfirmed) {
-              this.router.navigateByUrl('auth/login');
-            }
-          });
+          Swal.fire({title: "Error !!",text: error,icon: "error",allowOutsideClick:false})
+            .then((response) => {
+              if (response.isConfirmed) {
+                this.router.navigateByUrl('auth/login');
+              }
+            });
         }
       })
   }

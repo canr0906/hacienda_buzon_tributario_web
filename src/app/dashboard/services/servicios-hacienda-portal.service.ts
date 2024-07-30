@@ -53,7 +53,6 @@ export class ServiciosHaciendaPortalService {
   }
 
   async getDetalleCobroISAN(importe:number, fecha:string, idConcepto:number): Promise<any> {
-    console.log(importe + ' | ' + fecha + ' | ' + idConcepto)
     return await fetch(`${this.baseUrlApi}conceptos/services/isan`, {
       method: "POST",
       body: `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:imp="http://impuestos/"><soapenv:Header/><soapenv:Body><imp:obtenerRezagosActualizacionAdicionales><!--Optional:--><idConcepto>${idConcepto}</idConcepto><!--Optional:--><importe>${importe}</importe><!--Optional:--><fecha>${fecha}</fecha></imp:obtenerRezagosActualizacionAdicionales></soapenv:Body></soapenv:Envelope>`,

@@ -166,7 +166,6 @@ export class SmytService {
 
     return this.http.post<VehicleDataResponseStruct>(`${this.baseUrlHacienda}serviciosHacienda/smyt/particular`,JSON.stringify(datosTramite),{headers})
       .pipe(
-        tap(resp=> console.log(resp)),
         map(resp => {
           if(resp.data.conceptos.length>0) {
             return resp;

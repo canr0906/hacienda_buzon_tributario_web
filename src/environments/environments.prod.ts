@@ -6,4 +6,5 @@ export const environments = {
   PASS_SERVER_APIREST: 'Hdes22G*_106',
   SISTEMA: 2,
   SECRET_KEY_CRYPTO: '3*U{m1q#t$>.I!/<0/^NXe"|6...gE',
+  MOVIMIENTO_SISTEMA_HACIENDA: 100
 }

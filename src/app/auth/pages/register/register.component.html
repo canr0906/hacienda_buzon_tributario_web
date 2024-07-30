@@ -1,7 +1,8 @@
 @if (isLoading()) {
   <load-spinner />
 }
-<div class="grid flex">
+<!--<div class="grid flex">-->
+<div class="shadow-8 m-3">
   <div ><!--[ngClass]="(sizeDisplay !== 'Small' && sizeDisplay !== 'XSmall')?'col-8':'col-12'" >-->
     <mat-card>
       <mat-card-header class="mb-3">
@@ -59,7 +60,7 @@
 
       <mat-card-actions align="end">
         <button mat-stroked-button mat-raised color="warn"
-          routerLink="/dashboard"><!--[routerLink]="['/pagos']"-->
+          [routerLink]="['/auth']">
           <mat-icon>cancel</mat-icon>
           Cancelar
         </button>

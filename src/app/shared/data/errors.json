@@ -14,5 +14,29 @@
   {
     "id":413,
     "type": "Fallo la respuesta del Servidor"
+  },
+  {
+    "id":414,
+    "type": "Fallo al generar la póliza"
+  },
+  {
+    "id":415,
+    "type": "Fallo al Obtener Entidad Federativa"
+  },
+  {
+    "id":415,
+    "type": "Fallo al Obtener Municipio(s)"
+  },
+  {
+    "id":416,
+    "type":"No se encontro información local del contexto General"
+  },
+  {
+    "id":417,
+    "type":"No se encontro información asociada al Tipo de Servicio"
+  },
+  {
+    "id":418,
+    "type":"Sin datos en hbtw_user para generar la póliza"
   }
 ]

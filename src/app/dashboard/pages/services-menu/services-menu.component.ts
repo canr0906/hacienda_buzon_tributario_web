@@ -33,19 +33,32 @@ export class ServicesMenuComponent implements OnInit {
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
   public isLoading = signal<boolean>(false);
 
+  public isAuthenticated = signal<boolean>(false);
+
   ngOnInit(): void {
     this.parentLayout.showoptions.set(false);
+    if(!!localStorage.getItem('hbtw_token')) {
+      this.isAuthenticated.set(true);
+    }
   }
 
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: string): void {
     console.log(id)
-    if(id.includes('buzon-tributario')) {
-      if(!localStorage.getItem('hbtw_token')) {
-        Swal.fire('Error', "Para tener acceso a este modulo necesita generar un registro", 'error');
-        return;
-      }
+    switch(id) {
+      case 'buzon-tributario':
+        if(!localStorage.getItem('hbtw_token')) {
+          Swal.fire('Error', "Para tener acceso a este modulo necesita generar un registro", 'error');
+          return;
+        }
+        break;
+      case 'portal-hacienda-servicios':
+        this.router.navigate(['/dashboard/'+id]);
+        break;
+      case 'auth':
+        this.router.navigate(['auth']);
+        break;
     }
-    this.router.navigate(['/dashboard/'+id]);
+
   }
 }

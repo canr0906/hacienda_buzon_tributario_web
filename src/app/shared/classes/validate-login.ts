@@ -17,7 +17,6 @@ export class ValidateLogin {
         try {
           return await this.authService.checkAuthStatusAsync()
           .then(result => {
-            console.log(result)
             if(result) {
               /* OBSERVABLE QUE RENUEVA EL TOKEN */
               return lastValueFrom( this.authService.checkAuthStatus() )
@@ -27,7 +26,6 @@ export class ValidateLogin {
                   }
                   return {message: `Error ${this.listErrors[2]} seccion Validar Login. Repórtelo al CAT e intentelo mas tarde`, success: false}
                 }).catch(err =>{
-                  console.log(err)
                   throw err
                 });
             } else {
@@ -35,11 +33,9 @@ export class ValidateLogin {
             }
           })
           .catch(error=>{
-            console.log(error)
             throw error;
           });
         }catch(err){
-          console.log(err)
           throw err;
         }
       }
@@ -48,9 +44,7 @@ export class ValidateLogin {
 
   sessionValidAndEncrypt() {
     let mss;
-
-              console.log(mss)
-              return mss
+    return mss
   }
 
 

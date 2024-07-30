@@ -5,8 +5,10 @@ export interface UserStruct {
   apellido_paterno?:string;
   apellido_materno?:string;
   tipo_identificacion?:number;
-  entidad?:string;
-  municipio?:string;
+  rfc?:string;
+  curp?:string;
+  entidad?:number;
+  municipio?:number;
   colonia?:string;
   cp?:number;
   calle?:string;

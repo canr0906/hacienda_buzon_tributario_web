@@ -1,3 +1,6 @@
+@if (isLoading()) {
+  <load-spinner></load-spinner>
+}
 <mat-card class="">
   <mat-card-header>
     <mat-tab-group (selectedIndexChange)="activeLinkFunct($event)">

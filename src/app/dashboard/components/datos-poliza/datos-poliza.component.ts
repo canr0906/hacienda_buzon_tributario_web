@@ -8,17 +8,22 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatTabsModule} from '@angular/material/tabs';
 import { Router } from '@angular/router';
 import { AuthServiceService } from '@auth/services/auth-service.service';
+import { GeneratePolicy } from '@dashboard/classes/generate-policy';
 import { Poliza } from '@dashboard/interfaces/smyt/poliza-data-response.interfaz';
 import { VehicleDataResponseStruct } from '@dashboard/interfaces/smyt/vehicle-data-response-struct';
 import { DataDecrypt } from '@shared/classes/data-decrypt';
 import { ValidateLogin } from '@shared/classes/validate-login';
+import { GeneralService } from '@shared/services/general.service';
 import Swal from 'sweetalert2';
+import ListErrors from '@shared/data/errors.json';
+import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 
 @Component({
   selector: 'app-datos-poliza',
   standalone: true,
   imports: [
     CommonModule,
+    LoadSpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatTabsModule,
@@ -41,8 +46,9 @@ export class DatosPolizaComponent implements OnInit {
   /* CONTROLA LA VISUALIZACION DEL SPINNER */
   public isLoading         = signal<boolean>(false);
 
-  private authService      = inject(AuthServiceService);
-  private router           = inject(Router);
+  private authService  = inject(AuthServiceService);
+  private router = inject(Router);
+  private serviciosGenerales = inject(GeneralService);
 
   private contribuyenteArr = {} as VehicleDataResponseStruct;
 
@@ -69,48 +75,154 @@ export class DatosPolizaComponent implements OnInit {
     fecha: ['']
   });
 
-  ngOnInit(): void {
-    new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
-      .then(resp => console.log(resp))
 
+  ngOnInit(): void {
+    this.isLoading.set(true);
     /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
-    new ValidateLogin(this.authService).validateSession()
+    /*new ValidateLogin(this.authService).validateSession()
       .then((resp:any)=> {
-        console.log(resp)
-        if(resp.success) {
+        console.log(resp)*/
+
+        let instanceGenPolicy =  new GeneratePolicy(this.serviciosGenerales);
+        //if(resp.success) {
           this.isAuthenticated.set(true);
-        }
+          instanceGenPolicy.generatePolicyWithLogin()
+            .then(resp =>{
+              if(resp) {
+                instanceGenPolicy.getState()
+                  .then(resp => {
+                    if(resp) {
+                      instanceGenPolicy.getMunicipio()
+                        .then(rep=> {
+                          if(resp) {
+                            instanceGenPolicy.getDataServices()
+                              .then(resp => {
+                                if(resp) {
+                                  instanceGenPolicy.getTipoServicio()
+                                    .then(resp => {
+                                      if(resp) {
+                                        instanceGenPolicy.generatePolyceGeneral()
+                                          .then(resp => {
+                                            if(!!rep) {
+                                              this.isLoading.set(false);
+                                              new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
+                                                .then(resp => {
+                                                  if(!!resp.hbtw_contribuyente) {
+                                                    this.isLoading.set(false);
+                                                    this.datosPoliza = resp.hbtw_datos_poliza.poliza;
+                                                    this.myForm.reset({
+                                                      numeroPoliza:resp.hbtw_datos_poliza.poliza.numeroPoliza, //this.datosPoliza.numeroPoliza,
+                                                      lineaCaptura:resp.hbtw_datos_poliza.poliza.lineaCaptura,//this.datosPoliza.lineaCaptura,
+                                                      monto: resp.hbtw_datos_poliza.poliza.total,//this.datosPoliza.total.toString(),
+                                                      nombrePago: instanceGenPolicy.getLocalStorageUser().nombre + ' ' + instanceGenPolicy.getLocalStorageUser().apellido_paterno + ' ' + instanceGenPolicy.getLocalStorageUser().apellido_materno, //this.contribuyenteArr.data.contribuyente.nombre + ' ' + this.contribuyenteArr.data.contribuyente.primerApellido + ' ' + this.contribuyenteArr.data.contribuyente.segundoApellido,
+                                                      lineaDetallePago: resp.hbtw_contribuyente.data.lineaDetalle,//this.contribuyenteArr.data.lineaDetalle,
+                                                      pago2015: '2015',
+                                                      banco: 'Bancomer',
+                                                      extra: 'ECONOMIA-',
+                                                      fecha: String(new Date().getDate()+4).toString()
+                                                    })
+                                                  } else {
+                                                    Swal.fire({icon: "error", title: `Error: ${ListErrors[9].id}`, text: `No se encontraron datos locales para generar la Póliza. Repórtelo al CAT`, allowOutsideClick:false})
+                                                      .then(()=>{
+                                                        this.authService.logout();
+                                                        this.router.navigateByUrl('/dashboar/portal-hacienda-servicios')
+                                                      });
+                                                  }
+                                                })
+
+                                            } else {
+                                              Swal.fire({icon: "error", title: `Error: ${ListErrors[4].id}`, text: `${ListErrors[4].type}`, allowOutsideClick:false})
+                                                .then(()=>{
+                                                  this.authService.logout();
+                                                  this.router.navigateByUrl('/auth')
+                                                });
+                                            }
+                                          })
+                                          .catch(err =>{
+                                            this.isLoading.set(false);
+                                            Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                                              .then(()=>{
+                                                this.authService.logout();
+                                                this.router.navigateByUrl('/auth')
+                                              });
+                                          })
+                                      } else {
+                                        Swal.fire({icon: "error", title: `Error: ${ListErrors[8].id}`, text: `${ListErrors[8].type}`, allowOutsideClick:false})
+                                          .then(()=>{
+                                            this.authService.logout();
+                                            this.router.navigateByUrl('/auth')
+                                          });
+                                      }
+                                    })
+                                    .catch(err => {
+                                      this.isLoading.set(false);
+                                      Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                                        .then(()=>{
+                                          this.authService.logout();
+                                          this.router.navigateByUrl('/auth')
+                                        });
+                                    })
+                                } else {
+                                  Swal.fire({icon: "error", title: `Error: ${ListErrors[7].id}`, text: `${ListErrors[7].type}`, allowOutsideClick:false})
+                                    .then(()=>{
+                                      this.authService.logout();
+                                      this.router.navigateByUrl('/auth')
+                                    });
+                                }
+                              })
+                              .catch(err => {
+                                this.isLoading.set(false);
+                                Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                                  .then(()=>{
+                                    this.authService.logout();
+                                    this.router.navigateByUrl('/auth')
+                                  });
+                              })
+                          } else {
+                            Swal.fire({icon: "error", title: `Error: ${ListErrors[6].id}`, text: `${ListErrors[6].type}`, allowOutsideClick:false})
+                            .then(()=>{
+                              this.authService.logout();
+                              this.router.navigateByUrl('/auth')
+                            });
+                          }
+                        })
+                        .catch(err => {
+                          this.isLoading.set(false);
+                          Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                            .then(()=>{
+                              this.authService.logout();
+                              this.router.navigateByUrl('/auth')
+                            });
+                        })
+                    }
+                  })
+                  .catch(err => {
+                    //APLICAR
+                  })
+              }
+            })
+            .catch(err => {
+              this.isLoading.set(false);
+              Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                .then(()=>{
+                  this.authService.logout();
+                  this.router.navigateByUrl('/auth')
+                });
+            });
+        //}
         //this.getCalculoPago(this.authService.getToken());
-      })
+
+      /*})
       .catch(err=>{
         this.isLoading.set(false);
-        Swal.fire({
-          icon: "error",
-          title: `Error: ${err.statusCode}`,
-          text: `${err.message}`
-        }).then(()=>{
-          this.authService.logout();
-          this.router.navigateByUrl('/auth')
-        });
-      })
+        Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+          .then(()=>{
+            this.authService.logout();
+            this.router.navigateByUrl('/auth')
+          });
+      })*/
     /* FIN */
 
-    this.contribuyenteArr = JSON.parse(localStorage.getItem('contribuyente_admin')!);
-    if (!this.contribuyenteArr.data.contribuyente) {
-      this.contribuyenteArr = JSON.parse(localStorage.getItem('contribuyente_only_admin')!);
-    }
-    this.datosPoliza = JSON.parse(localStorage.getItem('datos_poliza_admin')!);
-    this.myForm.reset({
-      numeroPoliza:this.datosPoliza.numeroPoliza,
-      lineaCaptura:this.datosPoliza.lineaCaptura,
-      monto: this.datosPoliza.total.toString(),
-      nombrePago: this.contribuyenteArr.data.contribuyente.nombre + ' ' + this.contribuyenteArr.data.contribuyente.primerApellido + ' ' + this.contribuyenteArr.data.contribuyente.segundoApellido,
-      lineaDetallePago: this.contribuyenteArr.data.lineaDetalle,
-      pago2015: '2015',
-      banco: 'Bancomer',
-      extra: 'ECONOMIA-',
-      fecha: String(new Date().getDate()+4).toString()
-    })
   }
 
   activeLinkFunct(link:number):void {

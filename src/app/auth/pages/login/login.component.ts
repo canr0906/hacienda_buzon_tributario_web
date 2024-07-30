@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 
@@ -37,7 +37,7 @@ import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
   private authService = inject(AuthServiceService);
   private validationService = inject(ValidationService)
@@ -60,6 +60,10 @@ export class LoginComponent {
     }
   );
 
+  ngOnInit(): void {
+    this.authService.logout();
+  }
+
   login(): void {
     if (this.myForm.invalid) {
       this.myForm.markAllAsTouched();
@@ -80,11 +84,11 @@ export class LoginComponent {
             this.router.navigateByUrl('dashboard/sevices-menu');
             return;
           }
-          Swal.fire('Error', "No se encontro informacion con las credenciales proporcionadas.", 'error');
+          Swal.fire({icon: "error", title: `Error !!`, text: `No se encontro informacion con las credenciales proporcionadas.`, allowOutsideClick:false});
         },
         error: (message) => {
           this.isLoading.set(false);
-          Swal.fire('Error', message, 'error');
+          Swal.fire({icon: "error", title: `Error !!`, text: `${message}`, allowOutsideClick:false});
         },
         complete: () => {}
       });

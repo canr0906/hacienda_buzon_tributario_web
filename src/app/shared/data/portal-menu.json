@@ -8,5 +8,10 @@
     "name":      "Pago de Servicios",
     "iconName": "pago_servicios",
     "route":     "portal-hacienda-servicios"
+  },
+  {
+    "name":      "Login",
+    "iconName": "login",
+    "route":     "auth"
   }
 ]
