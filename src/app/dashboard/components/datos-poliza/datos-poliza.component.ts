@@ -143,14 +143,14 @@ export class DatosPolizaComponent implements OnInit {
                                             Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
                                               .then(()=>{
                                                 this.authService.logout();
-                                                this.router.navigateByUrl('/auth')
+                                                this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                                               });
                                           })
                                       } else {
                                         Swal.fire({icon: "error", title: `Error: ${ListErrors[8].id}`, text: `${ListErrors[8].type}`, allowOutsideClick:false})
                                           .then(()=>{
                                             this.authService.logout();
-                                            this.router.navigateByUrl('/auth')
+                                            this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                                           });
                                       }
                                     })
@@ -159,7 +159,7 @@ export class DatosPolizaComponent implements OnInit {
                                       Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
                                         .then(()=>{
                                           this.authService.logout();
-                                          this.router.navigateByUrl('/auth')
+                                          this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                                         });
                                     })
                                 } else {
@@ -175,14 +175,14 @@ export class DatosPolizaComponent implements OnInit {
                                 Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
                                   .then(()=>{
                                     this.authService.logout();
-                                    this.router.navigateByUrl('/auth')
+                                    this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                                   });
                               })
                           } else {
                             Swal.fire({icon: "error", title: `Error: ${ListErrors[6].id}`, text: `${ListErrors[6].type}`, allowOutsideClick:false})
                             .then(()=>{
                               this.authService.logout();
-                              this.router.navigateByUrl('/auth')
+                              this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                             });
                           }
                         })
@@ -191,7 +191,7 @@ export class DatosPolizaComponent implements OnInit {
                           Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
                             .then(()=>{
                               this.authService.logout();
-                              this.router.navigateByUrl('/auth')
+                              this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                             });
                         })
                     }

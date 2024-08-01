@@ -1,4 +1,5 @@
 import { Component, Inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 
@@ -6,7 +7,8 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
   selector: 'hacienda-snack-bar',
   standalone: true,
   imports: [
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
   template: `
     <div class="card">
@@ -19,7 +21,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
             <span [innerHTML]="data"></span>
         </p>
         <span matSnackBarActions>
-          <button mat-button matSnackBarAction (click)="sbRef.dismissWithAction()">
+          <button mat-button matSnackBarAction (click)="sbRef.dismissWithAction()" style="color: white;">
           <mat-icon>close</mat-icon>
           </button>
         </span>

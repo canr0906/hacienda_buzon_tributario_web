@@ -110,20 +110,23 @@ export class GeneratePolicy {
   async getTipoServicio(): Promise<boolean> {
     let tipoSer = [];
     let route_origen:string = this.datos.hbtw_route_origen?.replaceAll('-','').toUpperCase()!;
-    await Object.entries(TipoServicio).forEach((v, k) => {
-      tipoSer = v.toString().split(',');
-      if (tipoSer[0]==route_origen.split('/').find((v,k) => k == 1 )){
-        this.servicio = tipoSer[1];
-      }
-    });
-    if(!!this.servicio) {
+    if(route_origen.includes('TABLACONCEPTOS')) {
       this.estadoPeticion.set(true);
       return true;
+    } else {
+      await Object.entries(TipoServicio).forEach((v, k) => {
+        tipoSer = v.toString().split(',');
+        if (tipoSer[0]==route_origen.split('/').find((v,k) => k == 1 )){
+          this.servicio = tipoSer[1];
+        }
+      });
+      if(!!this.servicio) {
+        this.estadoPeticion.set(true);
+        return true;
+      }
+      this.estadoPeticion.set(false);
+      return false;
     }
-    this.estadoPeticion.set(false);
-    return false;
-
-
   }
   /*?.- */
   async generatePolyceGeneral(): Promise<boolean> {

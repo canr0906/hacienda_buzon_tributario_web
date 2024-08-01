@@ -73,6 +73,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
     new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
       .then(resp => {
         this.localStorageControl = resp;
+        this.conceptTitle.set(this.localStorageControl.hbtw_concept!);
         /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
         new ValidateLogin(this.authService).validateSession()
         .then((resp:any)=> {

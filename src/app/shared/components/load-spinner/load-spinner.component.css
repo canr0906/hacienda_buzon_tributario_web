@@ -23,7 +23,7 @@ span {
   position: absolute;
   top: 0px;
   left: 0px;
-  z-index: 80;
+  z-index: 110;
   height: 100%;
   width: 100%;
 }

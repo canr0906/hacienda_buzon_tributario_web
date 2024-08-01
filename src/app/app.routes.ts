@@ -50,6 +50,11 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/components/tabla-calculo-conceptos/tabla-calculo-conceptos.component').then(c =>c.TablaCalculoConceptosComponent),
       },
       {
+        path: 'tabla-conceptos/:idConcepto/:tipoForm',
+        title: 'Tabla de Conceptos',
+        loadComponent: () => import('./dashboard/components/tabla-calculo-conceptos/tabla-calculo-conceptos.component').then(c =>c.TablaCalculoConceptosComponent),
+      },
+      {
         path: 'datos-contribuyente',
         title: 'Datos Contribuyente',
         loadComponent: () => import('./dashboard/components/tax-payer-data/tax-payer-data.component').then(c => c.TaxPayerDataComponent),
@@ -71,16 +76,24 @@ export const routes: Routes = [
           },
           {
             path: '',
-            redirectTo: 'dashboard/buzon_contribuyente',
+            redirectTo: 'buzon_contribuyente',
             pathMatch: 'full'
-          }
+          },
+          /*{
+            path: '**',
+            loadComponent: () => import('./dashboard/pages/not-found-page/not-found-page.component').then(c => c.NotFoundPageComponent)
+          }*/
         ]
       },
       {
         path: '',
-        redirectTo: 'dashboard/sevices-menu',
+        redirectTo: 'sevices-menu',
         pathMatch: 'full'
-      }
+      },
+      /*{
+        path: '**',
+        loadComponent: () => import('./dashboard/pages/not-found-page/not-found-page.component').then(c => c.NotFoundPageComponent)
+      }*/
     ]
   },
   {

@@ -29,6 +29,8 @@ import { DataEncrypt } from '@shared/classes/data-encrypt';
 import { IsanCobros } from '@dashboard/interfaces/soap-data-struct.interfaz';
 import { estadoVehiculo } from '@dashboard/interfaces/soap-estado-vehiculo-struct.interfaz';
 import { ConvertXmlString } from '@dashboard/classes/convert-xml-string';
+import { SnackBarComponent } from '@shared/components/snack-bar/snack-bar.component';
+import { SoapServiciosConceptosDetalle } from '@dashboard/interfaces/soap-servicios_conceptos';
 
 
 @Component({
@@ -84,6 +86,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   private smytService          = inject(SmytService);
   private generalService       = inject(ServiciosHaciendaPortalService);
 
+
   /* INICIO: CONTROLA LA RESOLUCION DEL DISPOSITIVO EN EL QUE SE ESTA REALIZANDO LA CONSULTA */
   private destroyed = new Subject<void>();
   private breakpointObserver = inject(BreakpointObserver);
@@ -106,7 +109,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
     return this.formTableCal.get('cantidadPago') as FormArray;
   }
 
-  constructor() {
+  constructor(private _snackBar: MatSnackBar,) {
     this.mediaQuery();
   }
 
@@ -149,6 +152,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   ngOnDestroy(): void {
     this.destroyed.next();
     this.destroyed.complete();
+    this.activatedRoute.params.subscribe().unsubscribe();
   }
 
   getCalculoPago(token:string){
@@ -195,19 +199,17 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
               }
             });
         } else {
-
-
           this.activatedRoute.params.subscribe(({ idConcepto, tipoForm }) => {
             this.tipoform.set(tipoForm);
             this.idConcepto.set(idConcepto);
-            //this.arrConceptos.update(() => [...this.arrConceptos(), idConcepto]);
+
             this.arrConceptos.update(values => [...values, idConcepto]);
             const datos = JSON.parse(localStorage.getItem('datos_cobro_admin')!);
-            switch (Number(this.tipoform)) {
+            switch (Number(this.tipoform())) {
               case 0: case 1: case 7:
                 this.tipoFormEdit.set(true);
                 if (this.tipoform() == 0) this.tipoFormEdit.set(false);
-                //this.openSnackBar('La cantidad inicial es 1. Si desea agregar mas, cambie el valor en el campo cantidad.');
+                this.openSnackBar('La cantidad inicial es 1. Si desea agregar mas, cambie el valor en el campo cantidad.');
                 this.consultConceptoPago(idConcepto, 1, this.tipoform());
                 break;
               case 4:
@@ -337,6 +339,13 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
       "cantidad": cantidad
     };
 
+    if (!!this.localStorageControl.hbtw_contribuyente) {
+      if(this.localStorageControl.hbtw_contribuyente.data.conceptos.find(resp => resp.conceptoArea == idConcepto) !== undefined) {
+        this.isLoading.set(false);
+        return;
+      }
+    }
+
     this.smytService.otherCalculoPagos(datos)
       .subscribe({
         next: (resp) => {
@@ -346,7 +355,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
               this.localStorageControl.hbtw_contribuyente!.data.conceptos.push(resp.data.conceptos[0]);
               this.localStorageControl.hbtw_contribuyente!.data.total = resp.data.total;
               this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle + resp.data.lineaDetalle;
-
+              this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
               new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
                 .then(response => {
                   if(!response) {
@@ -357,7 +366,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                   Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
                   .then(()=>{
                     this.authService.logout();
-                    this.router.navigateByUrl('/auth')
+                    this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                   });
                 });
               if (this.total() === 0) {
@@ -369,17 +378,17 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             }
             //this.conceptos = resp.data.conceptos;
             //localStorage.setItem('contribuyente_admin', JSON.stringify(resp));//this.conceptoPago));
+            this.conceptos = resp.data.conceptos;
             this.localStorageControl.hbtw_contribuyente = resp;
             new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
                 .then(response=> {
                   if(!!response) {
                     this.total.set( this.total() + resp.data.total);
-                    /*if (this.generalService.conceptoStorage.filter(resp => resp.idConcepto === Number(idConcepto) && resp.combinable == 1).length > 0) {
+                    if (this.generalService.conceptoStorage.filter(resp => resp.idConcepto === Number(idConcepto) && resp.combinable == 1).length > 0) {
                       setTimeout(() => {
                         this.openSnackBar('Para agregagar otro concepto, seleccionelo en el menu lateral');
                       }, 3000)
-                    }*/
-                    return;
+                    }
                   }else{
                     throw {message:"No fue posible guardar la información de manera local",error:"Unauthorized",statusCode:412};
                   }
@@ -388,13 +397,14 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                   Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
                   .then(()=>{
                     this.authService.logout();
-                    this.router.navigateByUrl('/auth')
+                    this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
                   });
                 });
+            return;
           }
-          //this.openSnackBar(resp.mensaje!);//'EL TRÁMITE YA SE HA REALIZADO');
+          this.openSnackBar(resp.mensaje!);
           setTimeout(() => {
-            this.router.navigate(['pagos']);
+            this.router.navigate(['dashboard/portal-hacienda-servicios']);
           }, 2000)
         },
         error: (err) =>{
@@ -438,7 +448,136 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
 
   }
 
-  sendCant(val: any): void {}
+  sendNoHoja() {
+    /** SOAP */
+    this.total.set(0);
+    this.isLoading.set(true);
+    const totalHojas = this.cantidadPago.controls[0].value;
+    let idConcepto = this.idConcepto();
+    let monto = 0.0;
+    this.generalService.getUma()
+      .subscribe({
+        next: (resp) => {
+          let asJson: SoapServiciosConceptosDetalle;
+          if (totalHojas == 1) {
+            idConcepto = 4023;//1416;
+          }
+          if (totalHojas >= 2 && totalHojas <= 50) {
+            idConcepto = 4021;
+            monto = resp!.data.uma + ((totalHojas - 1) * (resp!.data.uma * 0.15));
+          }
+          if (totalHojas > 50) {
+            idConcepto = 4022;
+            monto = resp!.data.uma + ((resp!.data.uma * 0.15) * 49) + ((totalHojas - 50) * (resp!.data.uma * 0.15));
+          }
+
+          this.generalService.getConceptoDetalleRest(idConcepto, totalHojas)
+            .subscribe({
+              next: (response) => {
+                let lineaDetalle: string = '';
+                this.isLoading.set(false);
+                this.conceptos = [{
+                  id: 0,
+                  clave: String(response?.data.conceptos[0].clave),
+                  cantidad: 1,
+                  descripcion: String(response?.data.conceptos[0].descripcion),
+                  ejercicioFiscal: Number(response?.data.conceptos[0].ejercicioFiscal),
+                  importe: response!.data.total
+                }];
+                this.localStorageControl.hbtw_contribuyente
+                response?.data.lineaDetalle.split('¬').forEach((k, v) => {
+                  if (v == 5) {
+                    lineaDetalle += monto + '¬';
+                  } else {
+                    lineaDetalle += k + '¬';
+                  }
+                });
+                this.localStorageControl.hbtw_contribuyente!.data.total = monto;
+                this.localStorageControl.hbtw_contribuyente!.data.conceptos = this.conceptos;
+                this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = lineaDetalle.slice(0, lineaDetalle.length - 1);
+                this.localStorageControl.hbtw_contribuyente!.success = true;
+                new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+                this.total.set(Number(monto));
+              },
+              error: (error) => {
+                Swal.fire({icon: "error", title: `Error`, text: `Problemas en obtener Detalle Concepto. Repórtelo al CAT e intente mas tarde`, allowOutsideClick:false})
+                .then(()=>{
+                  this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
+                });
+              }
+            });
+
+        },
+        error: (err) =>{
+          Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}. Repórtelo al CAT e intente mas tarde`, allowOutsideClick:false})
+            .then(()=>{
+              this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
+            });
+        }
+      })
+  }
+
+  /* SE INVOCA AL CAMBIAR EN LA TABLA EL CAMPO CANTIDAD O No DE HOJA */
+  sendCant(val: any): void {
+    if (this.tipoform() == 8) {
+      this.sendNoHoja();
+      return;
+    }
+
+    //let contribuyente: TopLevel = JSON.parse(localStorage.getItem('contribuyente')!);
+    this.total.set(0);
+    let lineDetalle: string = '';
+    let keyDel: number = 0;
+    let flagKey: boolean = false;
+    this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = '';
+    if (Number(this.cantidadPago.controls[val].value) == 0) {
+      this.localStorageControl.hbtw_contribuyente!.data.conceptos.splice(val,1);
+      //contribuyente.data.conceptos.splice(val, 1);
+      this.localStorageControl.hbtw_contribuyente!.data.conceptos.forEach(({ importe }) => {
+        this.total.set(this.total() + importe);
+      });
+      this.cantidadPago.removeAt(val);
+      this.localStorageControl.hbtw_contribuyente!.data.total = this.total();
+      this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
+      if (this.conceptos.length == 0) {
+        this.router.navigate(['/pagos/dependencias']);
+      }
+      this.arrConceptos().splice(val, 1);//push(idConcepto);
+      //localStorage.setItem('contribuyente', JSON.stringify(contribuyente));
+      return
+    }
+    this.isLoading.set(true);
+    this.generalService.getConceptoDetalleRest(this.arrConceptos()[val], this.cantidadPago.controls[val].value)//this.idConcepto,this.cantidadPago.controls[key].value)
+      .subscribe({
+        next: (resp) => {
+          if (!resp) {
+            this.openSnackBar('Problema con el API-SERVER, favor de contactar a Servicio Técnico ');
+            return;
+          }
+          this.localStorageControl.hbtw_contribuyente!.data.conceptos[val].importe= resp.data.conceptos[0].importe;
+          this.localStorageControl.hbtw_contribuyente!.data.conceptos[val].cantidad = resp.data.conceptos[0].cantidad;
+          this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle += resp.data.lineaDetalle;
+
+          this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
+        },
+        complete: () => {
+          this.isLoading.set(false);
+          this.localStorageControl.hbtw_contribuyente!.data.conceptos.forEach(({ importe }) => {
+            this.total.set(this.total() + importe);
+          });
+          this.localStorageControl.hbtw_contribuyente!.data.total = this.total();
+          new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+          .catch(err=>{
+            Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
+              .then(()=>{
+                this.authService.logout();
+                this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
+              });
+          });
+          //localStorage.setItem('contribuyente', JSON.stringify(contribuyente));
+        }
+      });
+  }
 
   public mediaQuery() {
     this.breakpointObserver
@@ -457,6 +596,12 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
           }
         }
       });
+  }
+
+  openSnackBar(message: string) {
+    this._snackBar.openFromComponent(SnackBarComponent, {
+      data: message, duration: 5500, panelClass: ["snack-notification"], horizontalPosition: "center", verticalPosition: "top",
+    });
   }
 
 }
