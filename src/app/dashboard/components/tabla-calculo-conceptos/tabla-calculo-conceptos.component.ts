@@ -200,6 +200,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             });
         } else {
           this.activatedRoute.params.subscribe(({ idConcepto, tipoForm }) => {
+            console.log('ENTRAAAAA')
             this.tipoform.set(tipoForm);
             this.idConcepto.set(idConcepto);
 
@@ -249,10 +250,10 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                 break;
               case 8:
                 this.tipoFormEdit_hoja.set(true);
-                /*this.displayedColumns.pop();
-                this.displayedColumns.push('no_hojas');
-                this.displayedColumns.push('subtotal');*/
-                //this.openSnackBar('El No de Hojas es 1. Si desea agregar mas, cambie el valor en el campo No Hojas.');
+                this.displayedColumns().pop();
+                this.displayedColumns().push('no_hojas');
+                this.displayedColumns().push('subtotal');
+                this.openSnackBar('El No de Hojas es 1. Si desea agregar mas, cambie el valor en el campo No Hojas.');
                 this.consultConceptoPago(idConcepto, 1, this.tipoform());
                 break;
               case 13:
