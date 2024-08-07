@@ -238,7 +238,6 @@ export class SidenavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   actionList(item: string, concept: string, id: number, idConcepto: string | number, padreId: number, gestora?: number) {
-    console.log(item + '-' + concept + '-' + id + '-' + idConcepto + '-' + padreId + '-' + gestora)
     /*
       NOTA:  DETERMINA SI EL CONCEPTO PERMITE AGREGAR MAS CONCEPTOS DE SU SECCION
     */

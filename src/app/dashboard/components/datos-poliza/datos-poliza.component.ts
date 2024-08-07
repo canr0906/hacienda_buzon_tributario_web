@@ -103,10 +103,11 @@ export class DatosPolizaComponent implements OnInit {
                                       if(resp) {
                                         instanceGenPolicy.generatePolyceGeneral()
                                           .then(resp => {
-                                            if(!!rep) {
+                                            if(!!resp) {
                                               this.isLoading.set(false);
                                               new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
                                                 .then(resp => {
+                                                  console.log(resp)
                                                   if(!!resp.hbtw_contribuyente) {
                                                     this.isLoading.set(false);
                                                     this.datosPoliza = resp.hbtw_datos_poliza.poliza;

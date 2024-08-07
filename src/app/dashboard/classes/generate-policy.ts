@@ -130,6 +130,8 @@ export class GeneratePolicy {
   }
   /*?.- */
   async generatePolyceGeneral(): Promise<boolean> {
+    console.log("GENERATE POLIZA::" + this.estadoPeticion())
+    console.log(this.datos)
     let policyData: PolicyData = {} as PolicyData;
     /*if(!!this.datos) {
       if (this.datos.hbtw_datos_cobro?.tipo_form && this.datos.hbtw_datos_cobro.tipo_form == 3) {
@@ -158,7 +160,7 @@ export class GeneratePolicy {
       policyData.observaciones = '???';
       policyData.datosAdicionales = '???';
       policyData.detalle = this.datos.hbtw_contribuyente?.data.lineaDetalle!;
-
+      console.log(policyData)
       return await lastValueFrom(this.serviciosGenerales.generarPolizaServ(policyData))
         .then(resp =>{
           if(resp.success) {

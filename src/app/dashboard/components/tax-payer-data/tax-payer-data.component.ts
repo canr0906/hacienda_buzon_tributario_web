@@ -133,7 +133,7 @@ export class TaxPayerDataComponent implements OnInit, AfterViewInit {
     this.registerUserStruct.calle     = String(this.myFormTaxPayer.get('datos_generales')?.get('domicilio')?.get('calle')?.value).toUpperCase();
     this.registerUserStruct.no_ext    = String(this.myFormTaxPayer.get('datos_generales')?.get('domicilio')?.get('numeroExterior')?.value).toUpperCase();
     this.registerUserStruct.no_int    = this.myFormTaxPayer.get('datos_generales')?.get('domicilio')?.get('numeroInterior')?.value??"";
-
+    console.log(new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt())
     new DataEncrypt(this.registerUserStruct).dataEncript('hbtw_user')
       .then(resp=>{
         this.router.navigate(['dashboard/generar_poliza']);

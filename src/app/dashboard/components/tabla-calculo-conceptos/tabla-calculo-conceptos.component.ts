@@ -117,12 +117,12 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
     this.isLoading.set(true);
     /* INICIO: ESTA SECCION DESENCRIPTA DATOS PARA OPERARLOS DENTRO DEL COMPONENTE, EVALUAR SI SE PUEDE OBTIMIZAR YA QUE SE USA EN TODOS  */
     new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
-    .then(resp => {
-      this.localStorageControl = resp;
+    .then(response => {
+      this.localStorageControl = response;
       /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
       new ValidateLogin(this.authService).validateSession()
-      .then((resp:any)=> {
-        if(resp.success) {
+      .then((res:any)=> {
+        if(res.success) {
           this.isAuthenticated.set(true);
         }
         this.getCalculoPago(this.authService.getToken());
@@ -156,9 +156,69 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
   }
 
   getCalculoPago(token:string){
+    this.activatedRoute.params.subscribe(({ idConcepto, tipoForm }) => {
+      this.tipoform.set(tipoForm);
+      this.idConcepto.set(idConcepto);
+      this.arrConceptos.update(values => [...values, idConcepto]);
 
-    this.smytService.getGeneralDataAsync()
+      if(!!this.localStorageControl.hbtw_vehicle_data) {
+        /* METODO QUE CALCULA EL MONTO A PAGAR DEL CONCEPTO PROPORCIONADO*/
+        this.smytService.getCalculoPagos(this.localStorageControl.hbtw_vehicle_data)
+          .subscribe({
+            next: (result) => {
+              this.isLoading.set(false);
+              if (result.success && result.data.conceptos.length > 0) {
+                this.conceptos = result.data.conceptos;
+                /* FORZAR EL DATASOURCE PARA REFRESCAR */
+                this.conceptos= [...this.conceptos];
+                this.total.set(this.total() + result.data.total);
+                this.localStorageControl.hbtw_contribuyente = result;
+                new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
+                  .then(response=> {
+                    if(!!response) {
+                      return;
+                    }else{
+                      throw {message:"No fue posible guardar la información de manera local",error:"Unauthorized",statusCode:412};
+                    }
+                  })
+                  .catch(err=>{
+                    Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}.`, allowOutsideClick:false})
+                      .then(()=>{
+                        this.authService.logout();
+                        this.router.navigateByUrl('/auth')
+                      });
+                  });
+                return;
+              }
+              Swal.fire({icon: "error", title: 'Error !!', text: 'EL TRÁMITE YA SE HA REALIZADO', allowOutsideClick:false})
+                .then(() => {
+                  this.router.navigate(['dashboard']);
+                });
+            },
+            error: (error) => {
+              Swal.fire({icon: "error", title: `Error: ${error.statusCode}`, text: error.message, allowOutsideClick:false})
+              .then(() => {
+                 this.router.navigate(['dashboard/portal-hacienda-servicios']);
+               });
+           }
+          });
+      } else {
+        switch (Number(this.tipoform())) {
+          case 0: case 1: case 7:
+            this.tipoFormEdit.set(true);
+            if (this.tipoform() == 0) this.tipoFormEdit.set(false);
+            this.openSnackBar('La cantidad inicial es 1. Si desea agregar mas, cambie el valor en el campo cantidad.');
+            this.consultConceptoPago(idConcepto, 1, this.tipoform());
+            break;
+        }
+      }
+
+
+    });
+
+    /*this.smytService.getGeneralDataAsync()
       .then((resp:StorageDataStruct) => {
+        console.log(resp)
         if(!!resp.hbtw_vehicle_data) {
           this.smytService.getCalculoPagos(resp.hbtw_vehicle_data)
             .subscribe({
@@ -200,11 +260,11 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             });
         } else {
           this.activatedRoute.params.subscribe(({ idConcepto, tipoForm }) => {
-            console.log('ENTRAAAAA')
-            this.tipoform.set(tipoForm);
-            this.idConcepto.set(idConcepto);
+            //console.log('ENTRAAAAA')
+            //this.tipoform.set(tipoForm);
+            //this.idConcepto.set(idConcepto);
 
-            this.arrConceptos.update(values => [...values, idConcepto]);
+            //this.arrConceptos.update(values => [...values, idConcepto]);
             const datos = JSON.parse(localStorage.getItem('datos_cobro_admin')!);
             switch (Number(this.tipoform())) {
               case 0: case 1: case 7:
@@ -280,7 +340,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             this.authService.logout();
             this.router.navigateByUrl('/auth')
           });
-      });
+      });*/
 
     /*const dataVehicleLs: DatosTramite = JSON.parse(localStorage.getItem('vehicle_data_admin')!);
     this.smytService.getCalculoPagos(dataVehicleLs)
@@ -357,6 +417,8 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
               this.localStorageControl.hbtw_contribuyente!.data.total = resp.data.total;
               this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle + resp.data.lineaDetalle;
               this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
+              /* FORZAR EL DATASOURCE PARA REFRESCAR */
+              this.conceptos= [...this.conceptos];
               new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
                 .then(response => {
                   if(!response) {
@@ -380,6 +442,8 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             //this.conceptos = resp.data.conceptos;
             //localStorage.setItem('contribuyente_admin', JSON.stringify(resp));//this.conceptoPago));
             this.conceptos = resp.data.conceptos;
+            /* FORZAR EL DATASOURCE PARA REFRESCAR */
+            this.conceptos= [...this.conceptos];
             this.localStorageControl.hbtw_contribuyente = resp;
             new DataEncrypt(this.localStorageControl).dataEncript('hbtw_general')
                 .then(response=> {
@@ -442,6 +506,8 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
           ejercicioFiscal: Number(adeudos['ejercicioFiscal']['#text']),
           importe: Number(adeudos['importe']['#text'])
         }];
+        /* FORZAR EL DATASOURCE PARA REFRESCAR */
+        this.conceptos= [...this.conceptos];
         localStorage.setItem('contribuyente', JSON.stringify({ data: { total: Number(adeudos['total']['#text']), conceptos: this.conceptos, lineaDetalle: String(adeudos['lineaDetalle']['#text']) }, success: true }));//this.conceptoPago));
         this.total.set(this.total() + Number(adeudos['total']['#text']));
       }).catch(err => console.log(err));
@@ -485,6 +551,8 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
                   ejercicioFiscal: Number(response?.data.conceptos[0].ejercicioFiscal),
                   importe: response!.data.total
                 }];
+                /* FORZAR EL DATASOURCE PARA REFRESCAR */
+                this.conceptos= [...this.conceptos];
                 this.localStorageControl.hbtw_contribuyente
                 response?.data.lineaDetalle.split('¬').forEach((k, v) => {
                   if (v == 5) {
@@ -530,7 +598,7 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
     let lineDetalle: string = '';
     let keyDel: number = 0;
     let flagKey: boolean = false;
-    this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = '';
+    //this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = '';
     if (Number(this.cantidadPago.controls[val].value) == 0) {
       this.localStorageControl.hbtw_contribuyente!.data.conceptos.splice(val,1);
       //contribuyente.data.conceptos.splice(val, 1);
@@ -540,8 +608,10 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
       this.cantidadPago.removeAt(val);
       this.localStorageControl.hbtw_contribuyente!.data.total = this.total();
       this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
+      /* FORZAR EL DATASOURCE PARA REFRESCAR */
+      this.conceptos= [...this.conceptos];
       if (this.conceptos.length == 0) {
-        this.router.navigate(['/pagos/dependencias']);
+        this.router.navigate(['/dashboard/portal-hacienda-servicios']);
       }
       this.arrConceptos().splice(val, 1);//push(idConcepto);
       //localStorage.setItem('contribuyente', JSON.stringify(contribuyente));
@@ -555,11 +625,18 @@ export class TablaCalculoConceptosComponent implements OnInit, OnDestroy{
             this.openSnackBar('Problema con el API-SERVER, favor de contactar a Servicio Técnico ');
             return;
           }
+
+          let arrLineaDetalle = this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle.split('|');
+          arrLineaDetalle.pop();
+          arrLineaDetalle[val] = resp.data.lineaDetalle;
+
           this.localStorageControl.hbtw_contribuyente!.data.conceptos[val].importe= resp.data.conceptos[0].importe;
           this.localStorageControl.hbtw_contribuyente!.data.conceptos[val].cantidad = resp.data.conceptos[0].cantidad;
-          this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle += resp.data.lineaDetalle;
+          this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle = arrLineaDetalle.join('|'); // this.localStorageControl.hbtw_contribuyente!.data.lineaDetalle + resp.data.lineaDetalle;
 
           this.conceptos = this.localStorageControl.hbtw_contribuyente!.data.conceptos;
+          /* FORZAR EL DATASOURCE PARA REFRESCAR */
+          this.conceptos= [...this.conceptos];
         },
         complete: () => {
           this.isLoading.set(false);
