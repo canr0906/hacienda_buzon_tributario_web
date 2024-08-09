@@ -18,7 +18,15 @@ export class GeneralService {
   private readonly userServHacienda: string = environments.USER_SERVER_APIREST;
   private readonly passServHacienda: string = environments.PASS_SERVER_APIREST;
 
+  private headers!:HttpHeaders;
+
   constructor() { }
+
+  generateHeaderServHacienda() {
+    this.headers = new HttpHeaders();
+    this.headers = this.headers.set("Content-Type", "application/json")
+    .set("Authorization", "Basic " + btoa(`${this.userServHacienda}:${this.passServHacienda}`));
+  }
 
   getMunicipios(idEntidad:number, idMunicipio?: number): Observable<MunicipiosResponseStruct|null> {
     let headers = new HttpHeaders();
