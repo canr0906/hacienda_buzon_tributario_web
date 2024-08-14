@@ -61,6 +61,9 @@ export class AuthServiceService {
   getToken(): string {
     return this.token;
   }
+  getUSer(): UserStruct {
+    return this.user;
+  }
   /* DESENCRIPTA DATOS DE USUARIO Y TOKEN */
   async checkAuthStatusAsync(): Promise<boolean> {
     try {

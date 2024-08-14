@@ -86,6 +86,11 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'historial_pagos',
+        title: 'Histórico de Pagos',
+        loadComponent: () => import('./dashboard/pages/historico-pagos/historico-pagos.component').then(c => c.HistoricoPagosComponent)
+      },
+      {
         path: '',
         redirectTo: 'sevices-menu',
         pathMatch: 'full'

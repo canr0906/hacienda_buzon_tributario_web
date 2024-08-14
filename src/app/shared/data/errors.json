@@ -38,5 +38,9 @@
   {
     "id":418,
     "type":"Sin datos en hbtw_user para generar la póliza"
+  },
+  {
+    "id":419,
+    "type": "La validación del usuario ha fallado"
   }
 ]

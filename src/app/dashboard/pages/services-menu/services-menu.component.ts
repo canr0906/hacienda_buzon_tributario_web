@@ -45,6 +45,13 @@ export class ServicesMenuComponent implements OnInit {
   /* NOTA: EMITE EL VALOR DE LA DEPENDECIA SELECCIONADA A LAYOUT */
   emitValCard(id: string): void {
     console.log(id)
+
+    if (new RegExp('^(?:https?):\/\/?').test(id)) {
+      window.open(`${id}`);
+      return;
+    }
+
+
     switch(id) {
       case 'buzon-tributario':
         if(!localStorage.getItem('hbtw_token')) {
@@ -55,6 +62,13 @@ export class ServicesMenuComponent implements OnInit {
         break;
       case 'portal-hacienda-servicios':
         this.router.navigate(['/dashboard/'+id]);
+        break;
+      case 'historial_pagos':
+        if(!localStorage.getItem('hbtw_token')) {
+          window.open('https://www.hacienda.morelos.gob.mx/index.php/tramites-y-servicios-en-linea/comprobantes-de-pago');
+          return;
+        }
+        this.router.navigate(['dashboard/historial_pagos']);
         break;
       case 'auth':
         this.router.navigate(['auth']);
