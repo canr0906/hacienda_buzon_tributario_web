@@ -207,4 +207,7 @@ export class GeneratePolicy {
   getLocalStorageUser() {
     return this.localStorageUser;
   }
+  getLocalStorageGeneral(){
+    return this.datos
+  }
 }

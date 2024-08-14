@@ -17,6 +17,8 @@ import { GeneralService } from '@shared/services/general.service';
 import Swal from 'sweetalert2';
 import ListErrors from '@shared/data/errors.json';
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
+import { HistoryPay } from '@shared/interfaces/history-pay.interfaz';
+import { UserStruct } from '@auth/interfaces/user-struct.interface';
 
 @Component({
   selector: 'app-datos-poliza',
@@ -72,7 +74,8 @@ export class DatosPolizaComponent implements OnInit {
     pago2015: ['2015'],
     banco: ['Bancomer'],
     extra: ['ECONOMIA-'],
-    fecha: ['']
+    fecha: [''],
+    sistema: ['86']
   });
 
 
@@ -104,6 +107,9 @@ export class DatosPolizaComponent implements OnInit {
                                         instanceGenPolicy.generatePolyceGeneral()
                                           .then(resp => {
                                             if(!!resp) {
+                                              console.log(instanceGenPolicy.getLocalStorageUser())
+                                              console.log(instanceGenPolicy.getLocalStorageGeneral())
+                                              //this.serviciosGenerales.setPayHistory();
                                               this.isLoading.set(false);
                                               new DataDecrypt(localStorage.getItem('hbtw_general')!).dataDecrypt()
                                                 .then(resp => {
@@ -120,8 +126,32 @@ export class DatosPolizaComponent implements OnInit {
                                                       pago2015: '2015',
                                                       banco: 'Bancomer',
                                                       extra: 'ECONOMIA-',
-                                                      fecha: String(new Date().getDate()+4).toString()
-                                                    })
+                                                      fecha: String(new Date().getDate()+4).toString(),
+                                                      sistema:'86'
+                                                    });
+
+                                                    if(!!localStorage.getItem('hbtw_token')) {
+                                                      new DataDecrypt(localStorage.getItem('hbtw_token')!).dataDecrypt()
+                                                        .then(token=>{
+                                                          const localUser:UserStruct = instanceGenPolicy.getLocalStorageUser()
+                                                          const varHistPay: HistoryPay = {} as HistoryPay;
+                                                          varHistPay.sistema = 2;
+                                                          varHistPay.fkUsuario = Number(localUser.pkUser);
+                                                          varHistPay.lineaCaptura = resp.hbtw_datos_poliza.poliza.lineaCaptura;
+                                                          this.serviciosGenerales.setPayHistory(varHistPay, token)
+                                                            .subscribe({
+                                                              next:()=>{},
+                                                              error:(err)=>{
+                                                                this.isLoading.set(false);
+                                                                Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                                                                  .then(()=>{
+                                                                    this.authService.logout();
+                                                                    this.router.navigateByUrl('auth')
+                                                                  });
+                                                              }
+                                                            });
+                                                        });
+                                                    }
                                                   } else {
                                                     Swal.fire({icon: "error", title: `Error: ${ListErrors[9].id}`, text: `No se encontraron datos locales para generar la Póliza. Repórtelo al CAT`, allowOutsideClick:false})
                                                       .then(()=>{
@@ -130,6 +160,14 @@ export class DatosPolizaComponent implements OnInit {
                                                       });
                                                   }
                                                 })
+                                                .catch(err => {
+                                                  this.isLoading.set(false);
+                                                  Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
+                                                    .then(()=>{
+                                                      this.authService.logout();
+                                                      this.router.navigateByUrl('/dashboard/portal-hacienda-servicios')
+                                                    });
+                                                });
 
                                             } else {
                                               Swal.fire({icon: "error", title: `Error: ${ListErrors[4].id}`, text: `${ListErrors[4].type}`, allowOutsideClick:false})

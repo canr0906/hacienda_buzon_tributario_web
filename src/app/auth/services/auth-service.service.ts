@@ -85,8 +85,10 @@ export class AuthServiceService {
     return this.http.post<LoginResponseStruct>(url,JSON.stringify(this.user),{headers})
       .pipe(
         map(data=>{
+          let status = false;
           if(!!data.token) {
-            new DataEncrypt(data.token).dataEncript('hbtw_token');
+            new DataEncrypt(data.token).dataEncript('hbtw_token')
+            this.checkAuthStatusAsync();
             return true;
           }
           return false;

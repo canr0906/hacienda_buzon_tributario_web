@@ -7,6 +7,9 @@ import { EntidadesRequestStruct } from '@shared/interfaces/entidades-request-str
 import { MunicipiosResponseStruct } from '@shared/interfaces/municipios-response-struct.interfaz';
 import { Observable, catchError, of, pipe, tap, throwError } from 'rxjs';
 import ListErrors from '@shared/data/errors.json';
+import { DataDecrypt } from '@shared/classes/data-decrypt';
+import { HistoryPay } from '@shared/interfaces/history-pay.interfaz';
+import { ResponseGeneral } from '@shared/interfaces/response-general.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +20,7 @@ export class GeneralService {
   private readonly baseUrlServHacienda: string = environments.BASE_URL_SERVHACIENDA;
   private readonly userServHacienda: string = environments.USER_SERVER_APIREST;
   private readonly passServHacienda: string = environments.PASS_SERVER_APIREST;
+  private readonly baseUrlSerHaciendaNest: string = environments.URL_SERVICIOSHACIENDA_NEST
 
   private headers!:HttpHeaders;
 
@@ -113,6 +117,33 @@ export class GeneralService {
           });
         })
       );
+  }
+
+  setPayHistory(varHistPay: HistoryPay, token:string): Observable<ResponseGeneral>{
+    let headers = new HttpHeaders();
+    headers = headers.set("Content-Type", "application/json")
+      .set("Authorization", "Bearer " + token);
+
+    return this.http.post<ResponseGeneral>(`${this.baseUrlSerHaciendaNest}auth/history-pay`,JSON.stringify(varHistPay),{headers})
+      .pipe(
+        //TODO: Errores
+        catchError( err =>{
+          let message = '';
+          return throwError( () => {
+            if(err.status==401) {
+              if(typeof err.error.message == 'object') {
+                Object.keys(err.error.message).map(key => message += err.error.message[key]);
+              } else {
+                message = err.error.message;
+              }
+            } else {
+              message = ListErrors[4].type;
+            }
+            throw {message:message,error:"Unauthorized",statusCode:ListErrors[4].id};
+          });
+        })
+      );
+
   }
 
 }

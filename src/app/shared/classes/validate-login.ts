@@ -24,7 +24,7 @@ export class ValidateLogin {
                   if(resp) {
                     return {message: "ok", success: true}
                   }
-                  return {message: `Error ${this.listErrors[2]} seccion Validar Login. Repórtelo al CAT e intentelo mas tarde`, success: false}
+                  throw {"message": `Error ${this.listErrors[2].id}. seccion Validar Login. Repórtelo al CAT e intentelo mas tarde`, "error": "Unauthorized", "statusCode": `${this.listErrors[1].id}`} //{message: `Error ${this.listErrors[1].id}. Repórtelo al CAT`, code: `${this.listErrors[1].id}`}
                 }).catch(err =>{
                   throw err
                 });

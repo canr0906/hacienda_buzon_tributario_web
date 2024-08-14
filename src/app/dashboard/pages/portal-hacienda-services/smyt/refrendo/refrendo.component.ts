@@ -88,7 +88,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
           Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}. Repórtelo al CAT e intente mas tarde`, allowOutsideClick:false})
             .then(()=>{
               this.authService.logout();
-              this.router.navigateByUrl('/auth')
+              this.router.navigate(['auth']);
             });
         });
         /* FIN */
@@ -98,7 +98,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
         Swal.fire({icon: "error", title: `Error: ${err.statusCode}`, text: `${err.message}`, allowOutsideClick:false})
           .then(()=>{
             this.authService.logout();
-            this.router.navigateByUrl('/auth')
+            this.router.navigate(['dashboard/portal-hacienda-servicios']);
           });
       });
       /* FIN */
@@ -128,7 +128,7 @@ export class RefrendoComponent implements OnInit,AfterContentInit {
             error: (message) => {
               this.isLoading.set(false);
               Swal.fire({icon: "error", title: "Error!!", text: message, allowOutsideClick:false})
-                .then(()=>{});
+                .then(()=>{ this.router.navigate(['dashboard/portal-hacienda-servicios']); });
             },
             complete: () => {}
           })
