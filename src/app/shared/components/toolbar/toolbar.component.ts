@@ -44,6 +44,8 @@ export class ToolbarComponent implements OnInit {
   /* MUESTRA LOS ICONOS DE MENU Y HOME */
   @Input()
   public showoptions = signal<boolean>(true);
+  @Input()
+  public showoptionsMenu = signal<boolean>(true);
 
   private servicesAuth = inject(AuthServiceService);
   private router = inject(Router);

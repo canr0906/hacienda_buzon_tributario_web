@@ -39,6 +39,7 @@ export class PortalHaciendaMenuComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     this.parentLayout.showoptions.set(true);
+    this.parentLayout.showoptionsMenu.set(true);
 
     this.activRouteSubs = this.activRoute.params.subscribe(({ flag }) => {
       /*if (!flag) {

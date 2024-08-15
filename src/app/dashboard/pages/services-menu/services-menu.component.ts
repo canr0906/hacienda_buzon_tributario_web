@@ -36,7 +36,8 @@ export class ServicesMenuComponent implements OnInit {
   public isAuthenticated = signal<boolean>(false);
 
   ngOnInit(): void {
-    this.parentLayout.showoptions.set(false);
+    this.parentLayout.showoptions.set(true);
+    this.parentLayout.showoptionsMenu.set(false);
     if(!!localStorage.getItem('hbtw_token')) {
       this.isAuthenticated.set(true);
     }

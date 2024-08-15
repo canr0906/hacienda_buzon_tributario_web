@@ -16,11 +16,14 @@ import { ValidateLogin } from '@shared/classes/validate-login';
 import {LoadSpinnerComponent} from '@shared/components/load-spinner/load-spinner.component';
 import Swal from 'sweetalert2';
 import ListErrors from '@shared/data/errors.json';
+import { LayoutDashComponent } from '@dashboard/layout/layout-dash.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-historico-pagos',
   standalone: true,
-  imports: [CommonModule,MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatIconModule, LoadSpinnerComponent],
+  imports: [CommonModule,MatFormFieldModule, MatInputModule, MatTableModule, MatSortModule, MatPaginatorModule, MatIconModule, LoadSpinnerComponent,MatCardModule,MatDividerModule],
   templateUrl: './historico-pagos.component.html',
   styleUrl: './historico-pagos.component.css'
 })
@@ -33,39 +36,29 @@ export class HistoricoPagosComponent implements OnInit {
   private serviceHistotyPay = inject(HistoricoPagosService);
   private authService       = inject(AuthServiceService);
   private router            = inject(Router);
+  /* INJECTA LAYOUT PARA PODER INTERACTUAL CON SUS METODOS */
+  private parentLayout      = inject(LayoutDashComponent);
 
   private arrDataSource  = signal<HistoricoPagosStruct[]>([]);
   public isAuthenticated = signal<boolean>(false);
   public isLoading       = signal<boolean>(false);
+  public nameTaxed       = signal<string>('');
   private listErrors     = ListErrors;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit(): void {
+    this.parentLayout.showoptions.set(true);
+    this.parentLayout.showoptionsMenu.set(false);
+
     this.activeRoute.params.subscribe(({sistema, tipoIdent, incGeneral, credential}) => {
-        /*localStorage.setItem('hbt_tipoidentificaion',tipoIdent);
-        localStorage.setItem('hbt_sistema',sistema);
-        localStorage.setItem('hbt_credencial',credential);
-
-        this.structConsultaAviso.incluirGenerales = incGeneral;
-        this.structConsultaAviso.noRegistro = environments.NO_REGISTROS;
-        this.structConsultaAviso.registro = 0;
-        if(Number.parseInt(tipoIdent)==1) {
-          this.structConsultaAviso.rfc = credential;
-          this.structConsultaAviso.curp = 'null';
-        } else {
-          this.structConsultaAviso.rfc = 'null';
-          this.structConsultaAviso.curp = credential;
-        }
-        this.structConsultaAviso.sistema = sistema;
-        this.structConsultaAviso.tipoIdentificacion = tipoIdent;*/
-
         /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
         new ValidateLogin(this.authService).validateSession()
           .then((resp:any)=> {
             if(resp.success) {
               this.isAuthenticated.set(true);
+              this.nameTaxed.set(`${this.authService.getUSer().nombre!} ${this.authService.getUSer().apellido_paterno!} ${this.authService.getUSer().apellido_materno!}`);
               /* METODO INTERNO PARA OBTENER LISTA DE PAGOS */
               this.serviceHistotyPay.getHistoryPayList(this.authService.getUSer().pkUser!,this.authService.getToken())
                 .subscribe({
@@ -112,6 +105,15 @@ export class HistoricoPagosComponent implements OnInit {
           });
         /* FIN */
     });
+  }
+
+  filter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
 

@@ -1,9 +1,10 @@
-import { Component, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { RouterModule } from '@angular/router';
 import { DataUpdateComponent } from '@dashboard/components/buzon-contribuyente/data-update/data-update.component';
 import { KnowMessageComponent } from '@dashboard/components/buzon-contribuyente/know-message/know-message.component';
 import { ShowRequirementDocComponent } from '@dashboard/components/buzon-contribuyente/show-requirement-doc/show-requirement-doc.component';
+import { LayoutDashComponent } from '@dashboard/layout/layout-dash.component';
 import { ConsultaAvisosService } from '@dashboard/services/buzon-contribuyente/consulta-avisos.service';
 import { Subject } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -21,7 +22,7 @@ import Swal from 'sweetalert2';
   templateUrl: './buzon-contribuyente.component.html',
   styleUrl: './buzon-contribuyente.component.css'
 })
-export class BuzonContribuyenteComponent implements OnDestroy {
+export class BuzonContribuyenteComponent implements OnInit, OnDestroy {
 
   /* NOTA: CONTROLA LA ACCION SOBRE EL SIDENAV DE ACUERDO A LA ACCION DEL HERMANO TOOLBAR */
   @ViewChild('drawer')
@@ -38,8 +39,15 @@ export class BuzonContribuyenteComponent implements OnDestroy {
   public prioridad       = signal<number>(0);
 
   private avisosService = inject(ConsultaAvisosService);
+  /* INJECTA LAYOUT PARA PODER INTERACTUAL CON SUS METODOS */
+  private parentLayout  = inject(LayoutDashComponent);
 
   public aceptEventAttend:Subject<boolean> = new Subject<boolean>();
+
+  ngOnInit(): void {
+    this.parentLayout.showoptions.set(true);
+    this.parentLayout.showoptionsMenu.set(false);
+  }
 
   ngOnDestroy(): void {
     this.aceptEventAttend.unsubscribe();

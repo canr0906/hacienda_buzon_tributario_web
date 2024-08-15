@@ -51,6 +51,7 @@ export class LayoutDashComponent implements OnDestroy {
 
   /* RECIBE DEL SERVICE-MENU.COMPONENT PARA VISUALIZAR O NO LAS OPCIONES DE TOOLBAR */
   public showoptions = signal<boolean>(true);
+  public showoptionsMenu = signal<boolean>(true);
 
   private destroyed = new Subject<void>();
   /* CONTROLAR LA RESOLUCION DE LA PANTALLA */
