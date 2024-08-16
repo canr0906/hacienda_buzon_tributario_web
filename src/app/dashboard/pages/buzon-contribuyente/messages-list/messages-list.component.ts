@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
   templateUrl: './messages-list.component.html',
   styleUrl: './messages-list.component.css'
 })
-export class MessagesListComponent implements AfterViewInit, OnInit {
+export class MessagesListComponent implements AfterViewInit, OnInit, OnDestroy {
 
   displayedColumns: string[] = ['id', 'mensaje', 'prioridad', 'url', 'mensajeAtendido', 'pkAviso', 'accion'];
   dataSource!: MatTableDataSource<StructDisplayTable>;
@@ -80,6 +80,10 @@ export class MessagesListComponent implements AfterViewInit, OnInit {
           console.log('EVENT:' + event);
         }
       })
+  }
+
+  ngOnDestroy(): void {
+    this.activeRoute.params.subscribe().unsubscribe();
   }
 
   searchMessages(flag:boolean=false) {

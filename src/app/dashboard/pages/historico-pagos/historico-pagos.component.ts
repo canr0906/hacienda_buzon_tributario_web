@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthServiceService } from '@auth/services/auth-service.service';
 import { HistoricoPagosStruct } from '@dashboard/interfaces/historico-pagos/historico-pagos-struct.interfaz';
 import { HistoricoPagosService } from '@dashboard/services/historico-pagos/historico-pagos.service';
@@ -27,12 +27,11 @@ import { MatDividerModule } from '@angular/material/divider';
   templateUrl: './historico-pagos.component.html',
   styleUrl: './historico-pagos.component.css'
 })
-export class HistoricoPagosComponent implements OnInit {
+export class HistoricoPagosComponent implements OnInit, OnDestroy {
 
   displayedColumns: string[] = ['lineacaptura', 'recibo', 'fechaPago', 'accion'];
   dataSource!: MatTableDataSource<HistoricoPagosStruct>;
 
-  private activeRoute       = inject(ActivatedRoute);
   private serviceHistotyPay = inject(HistoricoPagosService);
   private authService       = inject(AuthServiceService);
   private router            = inject(Router);
@@ -52,7 +51,7 @@ export class HistoricoPagosComponent implements OnInit {
     this.parentLayout.showoptions.set(true);
     this.parentLayout.showoptionsMenu.set(false);
 
-    this.activeRoute.params.subscribe(({sistema, tipoIdent, incGeneral, credential}) => {
+    //this.activeRoute.params.subscribe(({sistema, tipoIdent, incGeneral, credential}) => {
         /* INICIO: METODO ASINCRONO QUE DESENCRIPTA DATOS DE USUARIO Y TOKEN */
         new ValidateLogin(this.authService).validateSession()
           .then((resp:any)=> {
@@ -104,7 +103,11 @@ export class HistoricoPagosComponent implements OnInit {
               });
           });
         /* FIN */
-    });
+    //});
+  }
+
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
   }
 
   filter(event: Event) {

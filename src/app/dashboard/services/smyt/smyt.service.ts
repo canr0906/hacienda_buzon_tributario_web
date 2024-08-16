@@ -15,6 +15,8 @@ import { DataDecrypt } from '@shared/classes/data-decrypt';
 import ListErrors from '@shared/data/errors.json';
 import { VehicleBySerie } from '@dashboard/interfaces/smyt/vehicle-by-serie.interfaz';
 import { StorageDataStruct } from '@shared/interfaces/localstorage/storage-data-struct.interfaz';
+import { HistoricPayVehicleResponse } from '@dashboard/interfaces/historico-pagos-vehicular/historico-pagos.vehicular-struct.interfaz';
+import { HistoricPayVehicleRequest } from '@dashboard/interfaces/historico-pagos-vehicular/historic-pay-vehicle.request.interfaz';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +29,18 @@ export class SmytService {
   private readonly urlApiRestNest: string = environments.URL_SERVICIOSHACIENDA_NEST;
   //private urlSOAP:string = environments.BASE_URL_SERV;
   private http = inject(HttpClient);
+  private headers!:HttpHeaders;
 
   /* LISTA DE ERRORES */
   private listErrors = ListErrors;
 
   constructor() { }
+
+  doToConnection(token:string) {
+    this.headers = new HttpHeaders();
+    this.headers = this.headers.set("Content-Type", "application/json")
+    .set("Authorization", "Bearer " + token);
+  }
 
   /*getOficinas(): Observable<StructOffice>{
     const url = `${this.baseUrl}/api/v1/menu-portal/findoficinas`;
@@ -155,6 +164,15 @@ export class SmytService {
           throw err;
         })
       );
+  }
+
+  getHistoryPayList(token:string,dataVehicle:HistoricPayVehicleRequest): Observable<HistoricPayVehicleResponse>{
+    this.doToConnection(token);
+    return this.http.post<any>(`${this.urlApiRestNest}smyt-services/historicpayvehicle`,JSON.stringify(dataVehicle),{headers:this.headers})
+      .pipe(
+        catchError(error => { return throwError( error ) })
+      );
+
   }
 
   getCalculoPagos(datosTramite:VehicleDataRequestStruct): Observable<VehicleDataResponseStruct> {

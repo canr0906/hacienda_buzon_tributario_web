@@ -17,7 +17,7 @@
   {
     "name":      "Histórico Pago Vehicular",
     "iconName": "historic_pay_vehicle",
-    "route":     "https://www.hacienda.morelos.gob.mx/index.php/tramites-y-servicios-en-linea/control-vehicular"
+    "route":     "historial_pagos_vehicular"
   },
   {
     "name":      "Hitórico de Pagos",

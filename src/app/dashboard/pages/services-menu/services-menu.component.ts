@@ -71,6 +71,9 @@ export class ServicesMenuComponent implements OnInit {
         }
         this.router.navigate(['dashboard/historial_pagos']);
         break;
+      case 'historial_pagos_vehicular':
+        this.router.navigate(['dashboard/historial_pagos_vehicular'])
+        break;
       case 'auth':
         this.router.navigate(['auth']);
         break;

@@ -1,5 +1,5 @@
 export interface HistoricoPagosStruct {
-  lineaCaptura: string
-  recibo:       string
-  fechaPago:    Date
+  lineaCaptura: string;
+  recibo:       string;
+  fechaPago:    Date;
 }
