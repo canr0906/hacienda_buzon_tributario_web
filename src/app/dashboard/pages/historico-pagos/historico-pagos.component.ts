@@ -58,6 +58,8 @@ export class HistoricoPagosComponent implements OnInit, OnDestroy {
             if(resp.success) {
               this.isAuthenticated.set(true);
               this.nameTaxed.set(`${this.authService.getUSer().nombre!} ${this.authService.getUSer().apellido_paterno!} ${this.authService.getUSer().apellido_materno!}`);
+
+              console.log(this.authService.getUSer())
               /* METODO INTERNO PARA OBTENER LISTA DE PAGOS */
               this.serviceHistotyPay.getHistoryPayList(this.authService.getUSer().pkUser!,this.authService.getToken())
                 .subscribe({
@@ -107,7 +109,7 @@ export class HistoricoPagosComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+    console.log("HISTOTICO-PAGOS DESTROY")
   }
 
   filter(event: Event) {

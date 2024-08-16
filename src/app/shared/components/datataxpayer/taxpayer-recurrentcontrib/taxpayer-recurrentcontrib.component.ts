@@ -9,6 +9,8 @@ import { ValidatorsService } from '@shared/services/validators.service';
 import MessagesList from '@shared/data/messages.json';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
 import Swal from 'sweetalert2';
+import { MatDialog } from '@angular/material/dialog';
+import { TaxpayerRecurrentrefrendoDialogComponent } from './taxpayer-recurrentrefrendo-dialog/taxpayer-recurrentrefrendo-dialog.component';
 
 @Component({
   selector: 'hacienda-taxpayer-recurrentcontrib',
@@ -25,6 +27,10 @@ import Swal from 'sweetalert2';
 })
 export class TaxpayerRecurrentcontribComponent {
 
+  readonly arrSeies = signal<string[]>([]);
+  //readonly name = model('');
+  readonly dialog = inject(MatDialog);
+
   private validatorService = inject(ValidatorsService);
 
   private listMessage = signal<MessageStruct[]>(MessagesList.smyt_alta_vehiculo)
@@ -33,32 +39,38 @@ export class TaxpayerRecurrentcontribComponent {
   public formTaxPayRecurrent: FormGroup = this.fb.group({
     smyt: this.fb.group({
       refrendo: false,
-      licencia: false,
+      /*licencia: false,
       numeroserie: [{value:'',disabled:true},[Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)]],
-      confirmserie: [{value:'',disabled:true},[Validators.required]]
-    },
+      confirmserie: [{value:'',disabled:true},[Validators.required]]*/
+    }/*,
     {
       validators: [
         this.validatorService.isFieldOneEqualFielTwo('numeroserie', 'confirmserie',4)
       ]
-    }
+    }*/
     ),
     impuestos: this.fb.group({
       erogaciones:false,
       hospedaje:false,
       balnearios:false,
       demasias:false,
-      isan:false
+      //isan:false
     })
   });
 
-  get refrendo() {
+  /*get refrendo() {
     return this.formTaxPayRecurrent.get('smyt')?.get('refrendo') as FormArray;
-  }
+  }*/
 
-  checherRefrendo(event:boolean){
+    checarRefrendo(event:boolean){
+      console.log(event);
+    const dialogRef = this.dialog.open(TaxpayerRecurrentrefrendoDialogComponent,{width: '640px',disableClose: true});
 
-    if(event) {
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed::'+result);
+
+    });
+    /*if(event) {
       Swal.fire({
         title:"<strong>Refrendo</strong>",
         html: `
@@ -70,11 +82,11 @@ export class TaxpayerRecurrentcontribComponent {
       return;
     }
     this.formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.disable();
-    this.formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.disable();
+    this.formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.disable();*/
     return;
   }
 
-  getMessageRecurrent(idMssg:number, nameField:string,subname:string) {
+  /*getMessageRecurrent(idMssg:number, nameField:string,subname:string) {
     let touched = this.formTaxPayRecurrent.get(subname)?.get(nameField)?.touched;
     let nameFileValue = this.formTaxPayRecurrent.get(subname)?.get(nameField)?.value;
     let pathSelect = this.validatorService.expSerieVehiculo
@@ -94,6 +106,6 @@ export class TaxpayerRecurrentcontribComponent {
 
     }
     return '';
-  }
+  }*/
 
 }

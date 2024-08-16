@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Incluir Series</h2>
+<mat-dialog-content>
+  <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="addNewSerie()" [disabled]="numeroserie.length>=3 || !formTaxPayRecurrentRefrendo.get('arrSeries')?.get('confirmserie')?.valid">
+    <mat-icon>add_circle </mat-icon>
+  </button>
+  <button mat-mini-fab type="button" aria-label="Example icon button with a menu icon" (click)="removeArrSerie()" [disabled]="numeroserie.length==1">
+    <mat-icon>do_not_disturb_on </mat-icon>
+  </button>
+  <br>
+  <div class="example-form" [formGroup]="formTaxPayRecurrentRefrendo" #chiltTaxPayRecurrentRefrendo>
+    <table formGroupName="arrSeries">
+      @for (numelement of numeroserie.controls; track $index) {
+        <tr>
+          <td>
+            <mat-form-field fxFlex class="" style="margin-left: 1em; margin-right:0.5em;" appearance="outline" formArrayName="numeroserie">
+              <mat-label>No de Serie</mat-label>
+              <input matInput [formControlName]="$index" type="text" >
+              <mat-error>{{ getMessageRecurrent(formTaxPayRecurrentRefrendo.get('arrSeries')?.get('numeroserie')?.getError('error'),'numeroserie','arrSeries') }}</mat-error>
+            </mat-form-field>
+          </td>
+          <td>
+            <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline" formArrayName="confirmserie">
+              <mat-label>Confirmar No de Serie</mat-label>
+              <input matInput onpaste="return false" [formControlName]="$index" type="text">
+              <mat-error>{{ getMessageRecurrent(formTaxPayRecurrentRefrendo.get('arrSeries')?.get('confirmserie')?.getError('error'),'confirmserie','arrSeries') }}</mat-error>
+            </mat-form-field>
+          </td>
+        </tr>
+      }
+    </table>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="sendData()" cdkFocusInitial>Ok</button><!--[mat-dialog-close]="animal()" cdkFocusInitial>Ok</button>-->
+</mat-dialog-actions>
+
+{{formTaxPayRecurrentRefrendo.valid}}
