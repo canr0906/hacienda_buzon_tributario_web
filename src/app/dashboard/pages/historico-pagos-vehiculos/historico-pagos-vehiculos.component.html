@@ -29,7 +29,10 @@
       <mat-divider></mat-divider>
       <br>
       @defer (on timer(1000)) {
-      <div class="mat-elevation-z8">
+      <div class="mat-elevation-z8" #THPV>
+
+        <button mat-raised-button color="primary" (click)="exportAsExcel()" [disabled]="!(dataSource.data.length>0)">Exportar a Excel</button>
+
         <table mat-table [dataSource]="dataSource" matSort>
 
           <!-- Concepto Column -->
@@ -39,9 +42,9 @@
           </ng-container>
 
           <!-- Ejercicio Fiscal Column -->
-          <ng-container matColumnDef="ejercicioFiscal">
+          <ng-container matColumnDef="ejercicio_fiscal">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Ejercicio Fiscal </th>
-            <td mat-cell *matCellDef="let row" > {{row.ejercicioFiscal}}</td>
+            <td mat-cell *matCellDef="let row" > {{row.ejercicio_fiscal}}</td>
           </ng-container>
 
           <!-- Recibo Column -->
@@ -53,9 +56,7 @@
           <!-- Fecha de Pago Column -->
           <ng-container matColumnDef="fechaPago">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha de Pago </th>
-            <td mat-cell *matCellDef="let row">
-              <mat-icon>{{row.fechaPago | date: 'dd/MM/yyyy'}}</mat-icon>
-            </td>
+            <td mat-cell *matCellDef="let row">{{row.fechaPago | date: 'yyyy-MM-dd'}}</td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -64,7 +65,7 @@
 
           <!-- Row shown when there is no matching data. -->
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="4">No data matching the filter </td>
+            <td class="mat-cell" colspan="4">No hay datos que mostrar </td>
           </tr>
         </table>
 

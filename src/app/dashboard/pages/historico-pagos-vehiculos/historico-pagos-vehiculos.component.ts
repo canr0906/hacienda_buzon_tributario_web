@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,7 @@ import { LayoutDashComponent } from '@dashboard/layout/layout-dash.component';
 import { SmytService } from '@dashboard/services/smyt/smyt.service';
 import { LoadSpinnerComponent } from '@shared/components/load-spinner/load-spinner.component';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-historico-pagos-vehiculos',
@@ -41,8 +42,8 @@ import Swal from 'sweetalert2';
 })
 export class HistoricoPagosVehiculosComponent implements OnInit {
 
-  displayedColumns: string[] = ['concepto', 'ejercicioFiscal', 'recibo', 'fechaPago'];
-  dataSource!: MatTableDataSource<HistoricoPagosVehicularStruct>;
+  displayedColumns: string[] = ['concepto', 'ejercicio_fiscal', 'recibo', 'fechaPago'];
+  dataSource: MatTableDataSource<HistoricoPagosVehicularStruct> = new MatTableDataSource();
 
 
   private fb            = inject(FormBuilder);
@@ -57,6 +58,7 @@ export class HistoricoPagosVehiculosComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('THPV') table!: ElementRef;
 
   public myFormHistoricVehicle: FormGroup = this.fb.group({
     placa: ['', [Validators.required]],
@@ -82,29 +84,25 @@ export class HistoricoPagosVehiculosComponent implements OnInit {
         this.dataSource = new MatTableDataSource(this.arrDataSource());
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        /*resp.data.forEach((element:HistoricoPagosStruct) => {
-          this.arrDataSource.update(() => [...this.arrDataSource(),
-            {
-              lineaCaptura:element.lineaCaptura,
-              recibo:element.recibo,
-              fechaPago:element.fechaPago,
-              accion:'cloud_download'
-            }]);
-        });
-
-          console.log(this.arrDataSource())
-        // Assign the data to the data source for the table to render
-        this.dataSource = new MatTableDataSource(this.arrDataSource());
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;*/
       },
       error:(err)=>{
         console.log(err)
         this.isLoading.set(false);
-        Swal.fire({icon: "error", title: "Error!!", text: err, allowOutsideClick:false})
-          .then(()=>{ this.router.navigate(['dashboard/portal-hacienda-servicios']); });
+        Swal.fire({icon: "error", title: "Error!!", text: err.error.message, allowOutsideClick:false})
+          .then(()=>{ });
       }
     });
   }
+
+  exportAsExcel()
+    {
+      const ws: XLSX.WorkSheet=XLSX.utils.table_to_sheet(this.table.nativeElement);//converts a DOM TABLE element to a worksheet
+      const wb: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+      /* save to file */
+      XLSX.writeFile(wb, 'SheetJS.xlsx');
+
+    }
 
 }
