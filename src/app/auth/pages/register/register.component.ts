@@ -182,8 +182,10 @@ export class RegisterComponent implements AfterViewInit {
         this.taxUserStruct.push({impuesto:2})
         flag=1;
         flag_v=1;
-        this.vehicleUserStruct.push({
-          serie: this.myFormReg.get('datos_contrib')?.get('smyt')?.get('numeroserie')?.value
+        this.childComponentContrib.seriesArr().forEach(x => {
+          this.vehicleUserStruct.push({
+            serie: x.serie
+          })
         })
       }
 
@@ -220,6 +222,7 @@ export class RegisterComponent implements AfterViewInit {
 
 
     let message: string = '';
+
     this.authService.registerTaxPayer(this.registerUserStruct)
       .subscribe({
         next: (resp) => {

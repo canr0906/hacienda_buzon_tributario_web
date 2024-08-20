@@ -1,21 +1,9 @@
 <div class="" [formGroup]="formTaxPayRecurrent" #chiltTaxPayContact>
 
   <div formGroupName="smyt">
-    <!--<div>
-      Licencia de Conducir <mat-checkbox formControlName="licencia" />
-    </div>-->
     <div class="">
       Refrendo <mat-checkbox formControlName="refrendo" style="padding-left: 5.5em;" (change)="checarRefrendo($event.checked)" />
-      <!--<mat-form-field fxFlex class="" style="margin-left: 1em; margin-right:0.5em;" appearance="outline">
-        <mat-label>No de Serie</mat-label>
-        <input matInput formControlName="numeroserie" type="text" >
-        <mat-error>{{ getMessageRecurrent(formTaxPayRecurrent.get('smyt')?.get('numeroserie')?.getError('error'),'numeroserie','smyt') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field fxFlex class="" style="margin-right:0.5em;" appearance="outline">
-        <mat-label>Confirmar No de Serie</mat-label>
-        <input matInput onpaste="return false" formControlName="confirmserie" type="text">
-        <mat-error>{{ getMessageRecurrent(formTaxPayRecurrent.get('smyt')?.get('confirmserie')?.getError('error'),'confirmserie','smyt') }}</mat-error>
-      </mat-form-field>-->
+      <button mat-stroked-button mat-raised color="primary" [disabled]="seriesArr().length==0" (click)="checarRefrendo(true)" type="button">Verificar Series</button>
     </div>
   </div>
   <div formGroupName="impuestos">
@@ -25,7 +13,6 @@
       <mat-checkbox formControlName="hospedaje">Hospedaje</mat-checkbox>
       <mat-checkbox formControlName="balnearios">Balnearios</mat-checkbox>
       <mat-checkbox formControlName="demasias">Demasias cáducas</mat-checkbox>
-      <!--<mat-checkbox formControlName="isan">ISAN</mat-checkbox>-->
     </div>
   </div>
 </div>

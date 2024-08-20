@@ -1,19 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
 import { ValidatorsService } from '@shared/services/validators.service';
 
-import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 
 import MessagesList from '@shared/data/messages.json';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { SeriesDataStruct } from '@dashboard/interfaces/smyt/series-data-struct.interfaz';
 
-export interface SeriesData {
-  serie: string;
-}
+
 
 @Component({
   selector: 'app-taxpayer-recurrentrefrendo-dialog',
@@ -31,38 +30,49 @@ export interface SeriesData {
   templateUrl: './taxpayer-recurrentrefrendo-dialog.component.html',
   styles: ``
 })
-export class TaxpayerRecurrentrefrendoDialogComponent {
+export class TaxpayerRecurrentrefrendoDialogComponent implements OnInit {
 
   private validatorService = inject(ValidatorsService);
   private fb               = inject(FormBuilder);
-
   readonly dialogRef       = inject(MatDialogRef<TaxpayerRecurrentrefrendoDialogComponent>);
-  //readonly data            = inject<DialogData>(MAT_DIALOG_DATA);
-  //readonly animal          = model(this.data.animal);
+  readonly data            = inject<SeriesDataStruct[]>(MAT_DIALOG_DATA);
 
   private listMessage      = signal<MessageStruct[]>(MessagesList.smyt_alta_vehiculo)
-  public seriesArr        = signal<SeriesData[]>([]);
+  public seriesArr         = signal<SeriesDataStruct[]>([]);
 
   public formTaxPayRecurrentRefrendo: FormGroup = this.fb.group({
-    arrSeries: this.fb.group({
-      numeroserie: this.fb.array([
-        ['', [Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)]]
-      ]),
-      confirmserie: this.fb.array([
-        ['', [Validators.required]]
-      ])
-    },{
-      validators: [
-        this.validatorService.isFieldOneEqualFielTwo('numeroserie', 'confirmserie',4)
-      ]
-    })
+    arrSeries: this.fb.array([])
   });
+
+  get arrSeries() {
+    return this.formTaxPayRecurrentRefrendo.get('arrSeries') as FormArray;
+  }
 
   get numeroserie() {
     return this.formTaxPayRecurrentRefrendo.get('arrSeries')?.get('numeroserie') as FormArray;
   }
   get confirmserie() {
     return this.formTaxPayRecurrentRefrendo.get('arrSeries')?.get('confirmserie') as FormArray;
+  }
+
+  ngOnInit(): void {
+    if(this.data.length>0) {
+      this.data.forEach(x => {
+        const grupo = this.fb.group({
+          numeroserie: [x.serie, [Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)]],
+          confirmserie: [x.serie, [Validators.required]]
+        },{validators: [this.validatorService.isFieldOneEqualFielTwo('numeroserie', 'confirmserie',4)]});
+
+        this.arrSeries.push(grupo);
+      })
+    }else{
+      const grupo = this.fb.group({
+        numeroserie: ['', [Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)]],
+        confirmserie: ['', [Validators.required]]
+      },{validators: [this.validatorService.isFieldOneEqualFielTwo('numeroserie', 'confirmserie',4)]})
+
+      this.arrSeries.push(grupo);
+    }
   }
 
   getMessageRecurrent(idMssg:number, nameField:string,subname:string) {
@@ -87,7 +97,7 @@ export class TaxpayerRecurrentrefrendoDialogComponent {
 
     }*/
       let messge: string = '';
-      if(nameField=='numeroserie') {
+      /*if(nameField=='numeroserie') {
         this.numeroserie.controls.forEach((val,key)=>{
           if(!!val.errors) {
             if(!!val.errors['required']) {
@@ -110,23 +120,32 @@ export class TaxpayerRecurrentrefrendoDialogComponent {
           }
           //messge = '';
         })
-      }
+      }*/
     return messge;
   }
 
   addNewSerie(){
-    this.numeroserie.push(
-      new FormControl('', [Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)])
-   );
+    const grupo = this.fb.group({
+      numeroserie: ['', [Validators.required, Validators.pattern(this.validatorService.expSerieVehiculo)]],
+      confirmserie: ['', [Validators.required]]
+    },{validators: [this.validatorService.isFieldOneEqualFielTwo('numeroserie', 'confirmserie',4)]});
+
+    this.arrSeries.push(grupo);
   }
 
-  removeArrSerie(){}
+  removeArrSerie(){
+    this.arrSeries.removeAt(this.arrSeries.length-1);
+  }
 
   onNoClick(): void {
     this.dialogRef.close();
   }
 
   sendData(){
-    this.seriesArr.update(() => [...this.seriesArr(),{serie:this.formTaxPayRecurrentRefrendo.get('numeroserie')?.value}])
+    this.arrSeries.controls.forEach((v,k) => {
+      this.seriesArr.update(() => [...this.seriesArr(),{serie:v.value.numeroserie}])
+    })
+
+    this.dialogRef.close(JSON.stringify(this.seriesArr()));
   }
 }
