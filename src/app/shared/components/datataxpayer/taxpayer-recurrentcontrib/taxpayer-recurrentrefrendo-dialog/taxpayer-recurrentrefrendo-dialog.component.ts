@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MessageStruct } from '@shared/interfaces/message-struct.interfaz';
@@ -11,13 +11,14 @@ import MessagesList from '@shared/data/messages.json';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SeriesDataStruct } from '@dashboard/interfaces/smyt/series-data-struct.interfaz';
-
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-taxpayer-recurrentrefrendo-dialog',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -37,7 +38,7 @@ export class TaxpayerRecurrentrefrendoDialogComponent implements OnInit {
   readonly dialogRef       = inject(MatDialogRef<TaxpayerRecurrentrefrendoDialogComponent>);
   readonly data            = inject<SeriesDataStruct[]>(MAT_DIALOG_DATA);
 
-  private listMessage      = signal<MessageStruct[]>(MessagesList.smyt_alta_vehiculo)
+  private listMessage      = signal<MessageStruct[]>(MessagesList.generic_message);
   public seriesArr         = signal<SeriesDataStruct[]>([]);
 
   public formTaxPayRecurrentRefrendo: FormGroup = this.fb.group({
@@ -75,7 +76,25 @@ export class TaxpayerRecurrentrefrendoDialogComponent implements OnInit {
     }
   }
 
-  getMessageRecurrent(idMssg:number, nameField:string,subname:string) {
+  getMessageRecurrent(idMssg:ValidationErrors|null|undefined, nameField:string,index:number) {
+    let message:MessageStruct[] = [];
+    console.log(idMssg)
+    if(idMssg!==null && idMssg!==undefined){
+      if(!!idMssg!['required']){
+        message = this.listMessage().filter(({id}) => id == 'required' );
+      }
+      if(!!idMssg!['pattern']){
+        message = this.listMessage().filter(({id}) => id == 'pattern' );
+      }
+      if(!!idMssg!['notEqual']){
+        message = this.listMessage().filter(({id}) => id == 'notEqual' );
+      }
+      return message[0].msg;
+    } else {
+      return '';
+    }
+    //this.arrSeries.controls[index].get(nameField)?.setErrors({ invalid: !!message?true:false, error: "Campo requerido" })
+
     /*this.numeroserie.controls.forEach(resp=>console.log(resp))
     console.log(idMssg)
     let touched = this.formTaxPayRecurrentRefrendo.get(subname)?.get(nameField)?.touched;

@@ -1,4 +1,4 @@
 export interface MessageStruct {
-  id: number;
+  id: number|string;
   msg: string;
 }

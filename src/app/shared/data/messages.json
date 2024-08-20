@@ -114,5 +114,19 @@
       "id": 100,
       "msg": "Campo requerido"
     }
+  ],
+  "generic_message": [
+    {
+      "id": "required",
+      "msg": "Campo requerido"
+    },
+    {
+      "id": "pattern",
+      "msg": "No cumple con el patron"
+    },
+    {
+      "id":"notEqual",
+      "msg": "Los valores de ambos campos deben ser iguales"
+    }
   ]
 }
