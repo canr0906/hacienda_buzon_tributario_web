@@ -93,54 +93,6 @@ export class TaxpayerRecurrentrefrendoDialogComponent implements OnInit {
     } else {
       return '';
     }
-    //this.arrSeries.controls[index].get(nameField)?.setErrors({ invalid: !!message?true:false, error: "Campo requerido" })
-
-    /*this.numeroserie.controls.forEach(resp=>console.log(resp))
-    console.log(idMssg)
-    let touched = this.formTaxPayRecurrentRefrendo.get(subname)?.get(nameField)?.touched;
-    let nameFileValue = this.formTaxPayRecurrentRefrendo.get(subname)?.get(nameField)?.value;
-    let pathSelect = this.validatorService.expSerieVehiculo
-
-    if(idMssg !== null && idMssg !== undefined) {
-      const message = this.listMessage().filter(({id}) => id == idMssg );
-      return message[0].msg;
-    }
-    if( touched ) {
-      let idMessage=101;
-      let pattern = new RegExp(pathSelect);
-      if(!pattern.test(nameFileValue) || nameFileValue == null) {
-        const message = this.listMessage().filter(({id}) => id == idMessage );
-        this.formTaxPayRecurrentRefrendo.get(subname)?.get(nameField)?.setErrors( { notEqual: true, error:idMessage } );
-        return message[0].msg;
-      }
-
-    }*/
-      let messge: string = '';
-      /*if(nameField=='numeroserie') {
-        this.numeroserie.controls.forEach((val,key)=>{
-          if(!!val.errors) {
-            if(!!val.errors['required']) {
-              messge = 'Este campo requerido';
-            }else{
-              messge = 'Formato incorrecto';
-            }
-          }
-          //messge = '';
-        })
-      }
-      if(nameField=='confirmserie') {
-        this.confirmserie.controls.forEach((val,key)=>{
-          if(!!val.errors) {
-            if(!!val.errors['required']) {
-              messge = 'Este campo requerido';
-            }else{
-              messge = 'Formato incorrecto';
-            }
-          }
-          //messge = '';
-        })
-      }*/
-    return messge;
   }
 
   addNewSerie(){
