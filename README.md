@@ -4,6 +4,10 @@
 2.- Manejo de loading en los distintos componentes
 3.- En taxpayer-datacontact checar que cuando se valida el tipo sale un error
 4.- En taxpayer-recurrentcontrib checar la validacion de los campos
+2108/2024
+5.- Ajustar los metodos de mensajes de los modulos taxpayer y checar los demas modulos
+6.- generar el modulo de edicion de datos de usuarios
+7.- Falta integrar el generar las notificaciones en automatico, es decir cuando haba login invocar metodo de generacion de mensajes 
 
 hbtw_user
 hbtw_token
